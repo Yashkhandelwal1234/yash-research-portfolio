@@ -381,7 +381,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
               <h2 className="text-base font-semibold text-foreground mb-2">Sources</h2>
               <div className="space-y-1.5">
                 {block.items.map(source => (
-                  <div key={source} className="flex items-center gap-2 text-[12px] text-muted-foreground hover:text-[#32d583] cursor-pointer transition-colors">
+                  <div key={source} className="flex items-center gap-2 text-[12px] text-muted-foreground">
                     <ExternalLink size={10} />{source}
                   </div>
                 ))}
@@ -434,8 +434,10 @@ function ArticleCard({ article, onClick }: { article: Article; onClick: () => vo
 
 // ─── Playlist Row ─────────────────────────────────────────────────────────────
 
-function PlaylistRow({ playlist, onSelect }: { playlist: ResearchPlaylist; onSelect: () => void }) {
+function PlaylistRow({ playlist, onSelect, onArticleClick }: { playlist: ResearchPlaylist; onSelect: () => void; onArticleClick: (article: Article) => void }) {
   const rowArticles = articles.filter(a => a.category === playlist.category);
+  const itemLabel = `${rowArticles.length} ${rowArticles.length === 1 ? "item" : "items"}`;
+
   return (
     <div className="group">
       <div className="flex items-center justify-between mb-3">
@@ -445,7 +447,7 @@ function PlaylistRow({ playlist, onSelect }: { playlist: ResearchPlaylist; onSel
             {getPlaylistIcon(playlist.icon)}
           </span>
           <h2 className="text-sm font-medium text-foreground">{playlist.title}</h2>
-          <span className="text-[11px] text-muted-foreground">{playlist.count} memos</span>
+          <span className="text-[11px] text-muted-foreground">{itemLabel}</span>
         </div>
         <button onClick={onSelect} className="text-[11px] text-muted-foreground hover:text-[#32d583] transition-colors flex items-center gap-1">
           View all <ChevronRight size={12} />
@@ -453,7 +455,7 @@ function PlaylistRow({ playlist, onSelect }: { playlist: ResearchPlaylist; onSel
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {rowArticles.slice(0, 3).map(a => (
-          <div key={a.slug} className="flex items-start gap-2 p-2.5 rounded-md hover:bg-[#1b211b] cursor-pointer group/item transition-colors border border-transparent hover:border-[#32d583]/10">
+          <button key={a.slug} onClick={() => onArticleClick(a)} className="flex items-start gap-2 p-2.5 rounded-md hover:bg-[#1b211b] cursor-pointer group/item transition-colors border border-transparent hover:border-[#32d583]/10 text-left">
             <ResearchCoverArt article={a} compact className="w-9 h-9 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[12px] font-medium text-foreground truncate group-hover/item:text-[#32d583] transition-colors leading-snug">
@@ -461,7 +463,7 @@ function PlaylistRow({ playlist, onSelect }: { playlist: ResearchPlaylist; onSel
               </p>
               <p className="text-[10px] text-muted-foreground">{a.readTime} min · {a.status}</p>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>
@@ -550,7 +552,7 @@ function DashboardCard({ dash, onArticleClick }: { dash: Dashboard; onArticleCli
             </button>
           )}
           {dash.relatedArticleSlug && (
-            <button onClick={onArticleClick} className="px-2 py-1.5 text-[11px] text-muted-foreground hover:text-[#32d583] transition-colors rounded border border-white/5 hover:border-white/10">
+            <button onClick={onArticleClick} aria-label={`Open related article for ${dash.title}`} className="px-2 py-1.5 text-[11px] text-muted-foreground hover:text-[#32d583] transition-colors rounded border border-white/5 hover:border-white/10">
               <FileText size={11} />
             </button>
           )}
@@ -562,7 +564,7 @@ function DashboardCard({ dash, onArticleClick }: { dash: Dashboard; onArticleCli
 
 // ─── Individual Article Page ───────────────────────────────────────────────────
 
-function ArticlePage({ article, onBack }: { article: Article; onBack: () => void }) {
+function ArticlePage({ article, onBack, onArticleClick }: { article: Article; onBack: () => void; onArticleClick: (article: Article) => void }) {
   const content = getArticleContent(article);
   const contents = content.filter((block): block is Extract<ArticleContentBlock, { type: "heading" }> => block.type === "heading");
 
@@ -608,7 +610,7 @@ function ArticlePage({ article, onBack }: { article: Article; onBack: () => void
         <p className="text-[11px] text-muted-foreground uppercase tracking-wide mb-3">Contents</p>
         <ol className="space-y-1.5">
           {contents.map((block, i) => (
-            <li key={block.text} className="flex items-center gap-2 text-[12px] text-foreground/70 hover:text-[#32d583] cursor-pointer transition-colors">
+            <li key={block.text} className="flex items-center gap-2 text-[12px] text-foreground/70">
               <span className="text-[10px] text-muted-foreground w-4">{i + 1}.</span>
               {block.text.replace(/^\d+\.\s*/, "")}
             </li>
@@ -624,13 +626,13 @@ function ArticlePage({ article, onBack }: { article: Article; onBack: () => void
         <p className="text-[11px] text-muted-foreground uppercase tracking-wide mb-3">Related Research</p>
         <div className="grid grid-cols-1 gap-2">
           {articles.filter(a => a.slug !== article.slug).slice(0, 3).map(a => (
-            <div key={a.slug} className="flex items-start gap-3 p-3 rounded-lg hover:bg-[#1b211b] cursor-pointer transition-colors border border-transparent hover:border-[#32d583]/10">
+            <button key={a.slug} onClick={() => onArticleClick(a)} className="flex items-start gap-3 p-3 rounded-lg hover:bg-[#1b211b] cursor-pointer transition-colors border border-transparent hover:border-[#32d583]/10 text-left">
               <ResearchCoverArt article={a} compact className="w-9 h-9 flex-shrink-0" />
               <div>
                 <p className="text-[12px] font-medium text-foreground hover:text-[#32d583] transition-colors">{a.title}</p>
                 <p className="text-[11px] text-muted-foreground">{formatDate(a.date)} · {a.readTime} min</p>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -692,7 +694,7 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
         </div>
         <div className="space-y-8">
           {playlists.map(pl => (
-            <PlaylistRow key={pl.slug} playlist={pl} onSelect={() => onNavigate("library")} />
+            <PlaylistRow key={pl.slug} playlist={pl} onSelect={() => onNavigate("library")} onArticleClick={onArticleClick} />
           ))}
         </div>
       </div>
@@ -763,8 +765,7 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
 
 // ─── Page: Library ────────────────────────────────────────────────────────────
 
-function LibraryPage({ onArticleClick }: { onArticleClick: (a: Article) => void }) {
-  const [search, setSearch] = useState("");
+function LibraryPage({ onArticleClick, search, onSearchChange }: { onArticleClick: (a: Article) => void; search: string; onSearchChange: (query: string) => void }) {
   const [filter, setFilter] = useState<ArticleStatus | "All">("All");
   const [category, setCategory] = useState("All");
 
@@ -788,7 +789,7 @@ function LibraryPage({ onArticleClick }: { onArticleClick: (a: Article) => void 
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => onSearchChange(e.target.value)}
             placeholder="Search memos..."
             className="w-full h-8 pl-8 pr-3 rounded-md bg-[#1b211b] border border-white/[0.07] text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#32d583]/40  transition-colors"
           />
@@ -884,67 +885,70 @@ function AboutPage() {
 
 function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
-  const [sent, setSent] = useState(false);
+  const [notice, setNotice] = useState(false);
 
   return (
     <div className="max-w-md mx-auto px-4 py-6">
       <h1 className="text-xl  font-semibold text-foreground mb-1">Get in Touch</h1>
       <p className="text-[13px] text-muted-foreground mb-6">Research collaborations, source suggestions, or feedback on the public research library.</p>
 
-      {sent ? (
-        <div className="text-center py-12">
-          <div className="w-12 h-12 rounded-full bg-[#32d583]/15 border border-[#32d583]/25 flex items-center justify-center mx-auto mb-3">
-            <CheckSquare size={20} className="text-[#32d583]" />
-          </div>
-          <p className="text-sm  text-foreground">Message sent.</p>
-          <p className="text-[12px] text-muted-foreground mt-1">{"I'll"} get back to you within 48 hours.</p>
+      <div className="mb-5 rounded-lg border border-white/[0.07] bg-[#101610] p-4">
+        <p className="text-[11px] text-[#32d583] uppercase tracking-wide mb-1">Local Placeholder</p>
+        <p className="text-[12px] text-muted-foreground leading-6">
+          This form is a local portfolio placeholder and does not send messages yet. Use the contact links below for real outreach.
+        </p>
+      </div>
+
+      {notice && (
+        <div className="mb-4 rounded-lg border border-[#f59e0b]/25 bg-[#f59e0b]/10 p-3">
+          <p className="text-[12px] text-foreground/80 leading-5">This form is not connected to a backend. Please use the contact links below.</p>
         </div>
-      ) : (
-        <form onSubmit={e => { e.preventDefault(); setSent(true); }} className="space-y-4">
-          {[
-            { label: "Name", key: "name", type: "text", placeholder: "Your name" },
-            { label: "Email", key: "email", type: "email", placeholder: "your@email.com" },
-            { label: "Subject", key: "subject", type: "text", placeholder: "Research question, collaboration..." },
-          ].map(field => (
-            <div key={field.key}>
-              <label className="block text-[11px]  text-muted-foreground mb-1.5 uppercase tracking-wide">{field.label}</label>
-              <input
-                type={field.type}
-                value={form[field.key as keyof typeof form]}
-                onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
-                placeholder={field.placeholder}
-                className="w-full h-9 px-3 rounded-md bg-[#1b211b] border border-white/[0.07] text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#32d583]/40 transition-colors"
-              />
-            </div>
-          ))}
-          <div>
-            <label className="block text-[11px]  text-muted-foreground mb-1.5 uppercase tracking-wide">Message</label>
-            <textarea
-              value={form.message}
-              onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-              rows={4}
-              placeholder="What are you working on?"
-              className="w-full px-3 py-2 rounded-md bg-[#1b211b] border border-white/[0.07] text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#32d583]/40 resize-none transition-colors"
+      )}
+
+      <form onSubmit={e => { e.preventDefault(); setNotice(true); }} className="space-y-4">
+        {[
+          { label: "Name", key: "name", type: "text", placeholder: "Your name" },
+          { label: "Email", key: "email", type: "email", placeholder: "your@email.com" },
+          { label: "Subject", key: "subject", type: "text", placeholder: "Research question, collaboration..." },
+        ].map(field => (
+          <div key={field.key}>
+            <label className="block text-[11px]  text-muted-foreground mb-1.5 uppercase tracking-wide">{field.label}</label>
+            <input
+              type={field.type}
+              value={form[field.key as keyof typeof form]}
+              onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
+              placeholder={field.placeholder}
+              className="w-full h-9 px-3 rounded-md bg-[#1b211b] border border-white/[0.07] text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#32d583]/40 transition-colors"
             />
           </div>
-          <button type="submit" className="w-full h-9 rounded-md bg-[#32d583] text-[#061006] text-[13px] font-medium hover:bg-[#49e99a] transition-colors">
-            Send Message
-          </button>
-        </form>
-      )}
+        ))}
+        <div>
+          <label className="block text-[11px]  text-muted-foreground mb-1.5 uppercase tracking-wide">Message</label>
+          <textarea
+            value={form.message}
+            onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+            rows={4}
+            placeholder="What are you working on?"
+            className="w-full px-3 py-2 rounded-md bg-[#1b211b] border border-white/[0.07] text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#32d583]/40 resize-none transition-colors"
+          />
+        </div>
+        <button type="submit" className="w-full h-9 rounded-md bg-[#32d583] text-[#061006] text-[13px] font-medium hover:bg-[#49e99a] transition-colors">
+          Show Contact Instructions
+        </button>
+      </form>
 
       <div className="mt-8 pt-6 border-t border-white/[0.07]">
         <p className="text-[11px]  text-muted-foreground uppercase tracking-wide mb-3">Other Ways</p>
         <div className="space-y-2">
           {[["Twitter / X", "@yashkhandelwal", Globe], ["GitHub", "github.com/yashkhandelwal", Github], ["Email", "yash@research.xyz", Mail]].map(([label, val, Icon]) => (
-            <a key={label as string} href="#" className="flex items-center gap-3 text-[12px] text-muted-foreground hover:text-[#32d583] transition-colors group">
-              <span className="w-6 h-6 rounded bg-[#1b211b] border border-white/[0.06] flex items-center justify-center group-hover:border-[#32d583]/20 transition-colors">
+            <div key={label as string} className="flex items-center gap-3 text-[12px] text-muted-foreground">
+              <span className="w-6 h-6 rounded bg-[#1b211b] border border-white/[0.06] flex items-center justify-center">
                 {/* @ts-ignore */}
                 <Icon size={11} />
               </span>
               <span className="flex-1">{label as string}</span>
               <span className="">{val as string}</span>
-            </a>
+            </div>
           ))}
         </div>
       </div>
@@ -965,13 +969,13 @@ const navItems = [
 
 function Sidebar({ current, onNavigate, collapsed }: { current: Page; onNavigate: (p: Page) => void; collapsed: boolean }) {
   return (
-    <aside className={`flex-shrink-0 bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 ${collapsed ? "w-14" : "w-52"}`}>
+    <aside className={`flex-shrink-0 bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 ${collapsed ? "w-14" : "w-14 sm:w-52"}`}>
       {/* Logo */}
-      <div className={`flex items-center gap-2.5 px-4 py-5 border-b border-white/[0.05] ${collapsed ? "justify-center px-0" : ""}`}>
+      <div className={`flex items-center gap-2.5 py-5 border-b border-white/[0.05] ${collapsed ? "justify-center px-0" : "justify-center px-0 sm:justify-start sm:px-4"}`}>
         <div className="w-7 h-7 rounded-md bg-[#32d583] flex items-center justify-center flex-shrink-0">
           <BookOpen size={14} className="text-[#061006]" />
         </div>
-        {!collapsed && <span className="text-[13px]  font-medium text-foreground tracking-tight">research.xyz</span>}
+        {!collapsed && <span className="hidden sm:inline text-[13px]  font-medium text-foreground tracking-tight">research.xyz</span>}
       </div>
 
       {/* Nav */}
@@ -980,9 +984,9 @@ function Sidebar({ current, onNavigate, collapsed }: { current: Page; onNavigate
           const active = current === item.id || (current === "article" && item.id === "library");
           return (
             <button key={item.id} onClick={() => onNavigate(item.id)}
-              className={`w-full flex items-center gap-3 px-2 py-2 rounded-md text-[12px] font-medium transition-all ${active ? "bg-[#32d583]/12 text-[#32d583]" : "text-[#8b978e] hover:text-foreground hover:bg-white/[0.04]"} ${collapsed ? "justify-center" : ""}`}>
+              className={`w-full flex items-center gap-3 px-2 py-2 rounded-md text-[12px] font-medium transition-all ${active ? "bg-[#32d583]/12 text-[#32d583]" : "text-[#8b978e] hover:text-foreground hover:bg-white/[0.04]"} ${collapsed ? "justify-center" : "justify-center sm:justify-start"}`}>
               <item.icon size={15} className="flex-shrink-0" />
-              {!collapsed && item.label}
+              {!collapsed && <span className="hidden sm:inline">{item.label}</span>}
             </button>
           );
         })}
@@ -990,14 +994,14 @@ function Sidebar({ current, onNavigate, collapsed }: { current: Page; onNavigate
 
       {/* Library section */}
       {!collapsed && (
-        <div className="px-3 pb-4 border-t border-white/[0.05] pt-3">
+        <div className="hidden sm:block px-3 pb-4 border-t border-white/[0.05] pt-3">
           <p className="text-[10px]  text-muted-foreground uppercase tracking-wide px-1 mb-2">Research Themes</p>
           <div className="space-y-0.5">
             {playlists.map(pl => (
-              <button key={pl.slug} className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-[11px] text-muted-foreground hover:text-foreground hover:bg-white/[0.03] transition-colors">
+              <div key={pl.slug} className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-[11px] text-muted-foreground">
                 <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: pl.color + "80" }} />
                 <span className="truncate">{pl.title}</span>
-              </button>
+              </div>
             ))}
           </div>
         </div>
@@ -1008,15 +1012,15 @@ function Sidebar({ current, onNavigate, collapsed }: { current: Page; onNavigate
 
 // ─── Right Panel ──────────────────────────────────────────────────────────────
 
-function RightPanel({ onClose }: { onClose: () => void }) {
+function RightPanel({ onClose, onArticleClick }: { onClose: () => void; onArticleClick: (article: Article) => void }) {
   return (
-    <aside className="w-64 flex-shrink-0 bg-[#0d120d] border-l border-white/[0.05] flex flex-col">
+    <aside className="hidden w-64 flex-shrink-0 bg-[#0d120d] border-l border-white/[0.05] md:flex flex-col">
       <div className="flex items-center justify-between px-4 py-4 border-b border-white/[0.05]">
         <div className="flex items-center gap-2">
           <ListChecks size={13} className="text-[#32d583]" />
           <span className="text-[12px] font-medium text-foreground">Research Queue</span>
         </div>
-        <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors"><X size={13} /></button>
+        <button onClick={onClose} aria-label="Close research queue" className="text-muted-foreground hover:text-foreground transition-colors"><X size={13} /></button>
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4 [&::-webkit-scrollbar]:hidden">
@@ -1025,14 +1029,14 @@ function RightPanel({ onClose }: { onClose: () => void }) {
           <p className="text-[10px]  text-muted-foreground uppercase tracking-wide mb-2 px-1">Next Up</p>
           <div className="space-y-1">
             {articles.slice(1, 4).map((a, i) => (
-              <div key={a.slug} className="flex items-start gap-2 p-2 rounded hover:bg-[#1b211b] transition-colors cursor-pointer group">
+              <button key={a.slug} onClick={() => onArticleClick(a)} className="w-full flex items-start gap-2 p-2 rounded hover:bg-[#1b211b] transition-colors cursor-pointer group text-left">
                 <span className="text-[10px]  text-muted-foreground w-4 pt-0.5 flex-shrink-0">{i + 1}</span>
                 <ResearchCoverArt article={a} compact className="w-8 h-8 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] text-foreground/80 group-hover:text-foreground line-clamp-2 leading-snug">{a.title.split(":")[0]}</p>
                   <p className="text-[10px]  text-muted-foreground mt-0.5">{a.readTime} min</p>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -1055,9 +1059,9 @@ function RightPanel({ onClose }: { onClose: () => void }) {
           <p className="text-[10px]  text-muted-foreground uppercase tracking-wide mb-2 px-1">Saved Sources</p>
           <div className="space-y-1">
             {savedSources.map(s => (
-              <div key={s} className="flex items-center gap-2 p-2 hover:bg-[#1b211b] rounded cursor-pointer group transition-colors">
-                <ExternalLink size={9} className="text-muted-foreground group-hover:text-[#32d583] flex-shrink-0 transition-colors" />
-                <span className="text-[11px] text-muted-foreground group-hover:text-foreground truncate transition-colors">{s}</span>
+              <div key={s} className="flex items-center gap-2 p-2 rounded">
+                <ExternalLink size={9} className="text-muted-foreground flex-shrink-0" />
+                <span className="text-[11px] text-muted-foreground truncate">{s}</span>
               </div>
             ))}
           </div>
@@ -1074,34 +1078,42 @@ function NowReadingBar({ article, onOpen }: { article: Article; onOpen: () => vo
   const [progress, setProgress] = useState(34);
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#050705]/95 border-t border-white/[0.08] flex items-center px-4 gap-4 z-50" style={{ backdropFilter: "blur(14px)" }}>
+    <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#050705]/95 border-t border-white/[0.08] flex items-center px-2 sm:px-4 gap-2 sm:gap-4 z-50" style={{ backdropFilter: "blur(14px)" }}>
       {/* Article info */}
-      <div className="flex items-center gap-3 w-64 min-w-0 flex-shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 w-36 sm:w-64 min-w-0 flex-shrink-0">
         <ResearchCoverArt article={article} compact className="w-10 h-10 flex-shrink-0" />
         <div className="min-w-0">
-          <button onClick={onOpen} className="text-[12px] font-semibold text-foreground hover:text-[#32d583] transition-colors truncate block max-w-[190px] leading-tight">
+          <button onClick={onOpen} aria-label={`Open ${article.title}`} className="text-[12px] font-semibold text-foreground hover:text-[#32d583] transition-colors truncate block max-w-[84px] sm:max-w-[190px] leading-tight">
             {article.title.split(":")[0]}
           </button>
-          <p className="text-[10px] text-muted-foreground truncate max-w-[190px]">{article.category}</p>
+          <p className="text-[10px] text-muted-foreground truncate max-w-[84px] sm:max-w-[190px]">{article.category}</p>
         </div>
         <Bookmark size={13} className="text-[#32d583] flex-shrink-0 hidden sm:block" />
       </div>
 
       {/* Controls */}
-      <div className="flex-1 flex flex-col items-center gap-1 max-w-md mx-auto">
-        <div className="flex items-center gap-3">
-          <button className="text-muted-foreground hover:text-foreground transition-colors"><SkipBack size={14} /></button>
-          <button onClick={() => setPlaying(p => !p)} className="w-7 h-7 rounded-full bg-foreground flex items-center justify-center hover:scale-105 transition-transform">
+      <div className="min-w-0 flex-1 flex flex-col items-center gap-1 max-w-md mx-auto">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button aria-label="Previous article" className="hidden sm:block text-muted-foreground hover:text-foreground transition-colors"><SkipBack size={14} /></button>
+          <button onClick={() => setPlaying(p => !p)} aria-label={playing ? "Pause reading session" : "Play reading session"} className="w-7 h-7 rounded-full bg-foreground flex items-center justify-center hover:scale-105 transition-transform">
             {playing ? <Pause size={11} className="text-[#061006]" /> : <Play size={11} className="text-[#061006] ml-0.5" />}
           </button>
-          <button className="text-muted-foreground hover:text-foreground transition-colors"><SkipForward size={14} /></button>
+          <button aria-label="Next article" className="hidden sm:block text-muted-foreground hover:text-foreground transition-colors"><SkipForward size={14} /></button>
         </div>
         <div className="w-full flex items-center gap-2">
-          <span className="text-[9px]  text-muted-foreground w-6 text-right">{Math.round(progress * article.readTime / 100)}m</span>
-          <div className="group flex-1 h-1 bg-white/10 rounded-full cursor-pointer overflow-hidden" onClick={e => { const r = e.currentTarget.getBoundingClientRect(); const next = Math.round((e.clientX - r.left) / r.width * 100); setProgress(Math.max(0, Math.min(100, next))); }}>
+          <span className="hidden sm:inline text-[9px]  text-muted-foreground w-6 text-right">{Math.round(progress * article.readTime / 100)}m</span>
+          <div
+            className="group flex-1 h-1 bg-white/10 rounded-full cursor-pointer overflow-hidden"
+            role="slider"
+            aria-label="Reading progress"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+            onClick={e => { const r = e.currentTarget.getBoundingClientRect(); const next = Math.round((e.clientX - r.left) / r.width * 100); setProgress(Math.max(0, Math.min(100, next))); }}
+          >
             <div className="h-full bg-[#32d583] rounded-full transition-all" style={{ width: `${progress}%` }} />
           </div>
-          <span className="text-[9px]  text-muted-foreground w-6">{article.readTime}m</span>
+          <span className="hidden sm:inline text-[9px]  text-muted-foreground w-6">{article.readTime}m</span>
         </div>
       </div>
 
@@ -1110,7 +1122,7 @@ function NowReadingBar({ article, onOpen }: { article: Article; onOpen: () => vo
         <div className="flex items-center gap-1 text-[10px]  text-muted-foreground">
           <StatusBadge status={article.status} />
         </div>
-        <div className="flex items-center gap-1 text-muted-foreground hover:text-foreground cursor-pointer transition-colors">
+        <div className="flex items-center gap-1 text-muted-foreground" aria-label="Display volume">
           <Volume2 size={13} />
           <div className="w-14 h-0.5 bg-white/10 rounded-full">
             <div className="h-full w-2/3 bg-white/30 rounded-full" />
@@ -1154,7 +1166,7 @@ export default function App() {
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top bar */}
           <header className="h-12 flex-shrink-0 flex items-center gap-3 px-4 border-b border-white/[0.05] bg-[#061006]/80 sticky top-0 z-40" style={{ backdropFilter: "blur(8px)" }}>
-            <button onClick={() => setSidebarCollapsed(c => !c)} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-white/[0.04]">
+            <button onClick={() => setSidebarCollapsed(c => !c)} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-white/[0.04]">
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="13" height="1.5" rx="0.75" fill="currentColor" /><rect x="1" y="7" width="13" height="1.5" rx="0.75" fill="currentColor" /><rect x="1" y="11" width="13" height="1.5" rx="0.75" fill="currentColor" /></svg>
             </button>
 
@@ -1169,7 +1181,7 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-1 ml-auto">
-              <button onClick={() => setRightPanelOpen(o => !o)} className={`p-1.5 rounded transition-colors ${rightPanelOpen ? "text-[#32d583] bg-[#32d583]/10" : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"}`}>
+              <button onClick={() => setRightPanelOpen(o => !o)} aria-label={rightPanelOpen ? "Hide research queue" : "Show research queue"} className={`hidden md:block p-1.5 rounded transition-colors ${rightPanelOpen ? "text-[#32d583] bg-[#32d583]/10" : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"}`}>
                 <PanelRight size={14} />
               </button>
               <div className="w-6 h-6 rounded-full bg-[#32d583]/20 border border-[#32d583]/30 flex items-center justify-center ml-1">
@@ -1181,8 +1193,8 @@ export default function App() {
           {/* Scrollable main content */}
           <main ref={mainRef} className="flex-1 overflow-y-auto pb-20 [&::-webkit-scrollbar]:hidden">
             {page === "home" && <HomePage onArticleClick={handleArticleClick} onNavigate={handleNavigate} />}
-            {page === "library" && <LibraryPage onArticleClick={handleArticleClick} />}
-            {page === "article" && <ArticlePage article={activeArticle} onBack={() => handleNavigate("library")} />}
+            {page === "library" && <LibraryPage onArticleClick={handleArticleClick} search={globalSearch} onSearchChange={setGlobalSearch} />}
+            {page === "article" && <ArticlePage article={activeArticle} onBack={() => handleNavigate("library")} onArticleClick={handleArticleClick} />}
             {page === "agents" && (
               <div className="px-4 py-6">
                 <div className="mb-6">
@@ -1216,7 +1228,7 @@ export default function App() {
         </div>
 
         {/* Right panel */}
-        {rightPanelOpen && <RightPanel onClose={() => setRightPanelOpen(false)} />}
+        {rightPanelOpen && <RightPanel onClose={() => setRightPanelOpen(false)} onArticleClick={handleArticleClick} />}
       </div>
 
       {/* Bottom Now Reading bar */}
