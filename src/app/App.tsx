@@ -236,16 +236,16 @@ function FigurePlaceholder({ block }: { block: { visual?: ArticleFigureVisual } 
   const tone = block.visual === "agent-network" ? "#a78bfa" : block.visual === "market-map" ? "#fb7185" : block.visual === "rate-spread" ? "#60a5fa" : "#32d583";
 
   return (
-    <div className="relative h-56 overflow-hidden rounded-md border border-white/[0.08] bg-[#0d120d]">
+    <div className="relative h-64 overflow-hidden rounded-md bg-[#0d120d] sm:h-72">
       <div
-        className="absolute inset-0 opacity-80"
-        style={{ background: `radial-gradient(circle at 22% 20%, ${tone}55, transparent 28%), radial-gradient(circle at 74% 70%, ${tone}33, transparent 32%), linear-gradient(135deg, rgba(255,255,255,0.06), transparent)` }}
+        className="absolute inset-0 opacity-70"
+        style={{ background: `radial-gradient(circle at 22% 20%, ${tone}44, transparent 28%), radial-gradient(circle at 74% 70%, ${tone}24, transparent 32%), linear-gradient(135deg, rgba(255,255,255,0.05), transparent)` }}
       />
-      <div className="absolute inset-6 grid grid-cols-5 gap-2 opacity-40">
-        {Array.from({ length: 15 }).map((_, i) => <span key={i} className="rounded-sm border border-white/25 bg-white/5" />)}
+      <div className="absolute inset-6 grid grid-cols-5 gap-2 opacity-35">
+        {Array.from({ length: 15 }).map((_, i) => <span key={i} className="rounded-sm border border-white/20 bg-white/5" />)}
       </div>
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="rounded-full border border-white/15 bg-black/25 px-3 py-1 text-[11px] text-white/75">
+        <div className="rounded-full border border-white/15 bg-black/25 px-3 py-1 text-[11px] text-white/70">
           Abstract research figure
         </div>
       </div>
@@ -261,50 +261,66 @@ function ArticleFigure({ block }: { block: Extract<ArticleContentBlock, { type: 
   }
 
   return (
-    <img
-      src={block.src}
-      alt={block.alt}
-      className="w-full rounded-md border border-white/[0.08] object-cover"
-      onError={() => setDidError(true)}
-    />
+    <div className="rounded-lg border border-white/[0.08] bg-[#0d120d] p-2">
+      <img
+        src={block.src}
+        alt={block.alt}
+        className="mx-auto max-h-[520px] w-full rounded-md object-contain"
+        onError={() => setDidError(true)}
+      />
+    </div>
   );
 }
 
 function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
   return (
-    <div className="space-y-6 mb-8">
+    <div className="mb-12 space-y-7">
       {blocks.map((block, index) => {
         if (block.type === "heading") {
-          return <h2 key={index} className="text-base font-semibold text-foreground pt-2">{block.text}</h2>;
+          return <h2 key={index} className="pt-5 text-[17px] font-semibold leading-snug text-foreground first:pt-0">{block.text}</h2>;
         }
 
         if (block.type === "paragraph") {
-          return <p key={index} className="text-[13px] text-muted-foreground leading-7">{block.text}</p>;
+          return <p key={index} className="text-sm leading-7 text-foreground/72 md:leading-8">{block.text}</p>;
         }
 
         if (block.type === "callout") {
           const tone = block.tone === "warning" ? "#f59e0b" : block.tone === "info" ? "#60a5fa" : "#32d583";
           return (
-            <div key={index} className="rounded-r-lg border-l-2 p-4 bg-white/[0.03]" style={{ borderColor: tone }}>
-              {block.label && <p className="text-[11px] uppercase tracking-wide mb-1" style={{ color: tone }}>{block.label}</p>}
-              <p className="text-sm text-foreground leading-6">{block.text}</p>
+            <div key={index} className="rounded-lg border border-white/[0.07] border-l-2 bg-[#101610] p-4 sm:p-5" style={{ borderLeftColor: tone }}>
+              {block.label && <p className="mb-2 text-[11px] uppercase tracking-wide" style={{ color: tone }}>{block.label}</p>}
+              <p className="text-sm leading-7 text-foreground/88">{block.text}</p>
             </div>
           );
         }
 
         if (block.type === "table") {
           return (
-            <div key={index} className="bg-[#0d120d] rounded-lg p-4 border border-white/[0.06] overflow-x-auto">
-              {block.title && <p className="text-[11px] text-muted-foreground uppercase tracking-wide mb-3">{block.title}</p>}
-              <div className="grid gap-0 text-[11px] min-w-[560px]" style={{ gridTemplateColumns: `repeat(${block.columns.length}, minmax(0, 1fr))` }}>
-                {block.columns.map(column => (
-                  <div key={column} className="py-1.5 px-2 border-b border-white/[0.08] text-muted-foreground">{column}</div>
-                ))}
-                {block.rows.flatMap((row, rowIndex) => row.map((cell, cellIndex) => (
-                  <div key={`${rowIndex}-${cellIndex}`} className={`py-1.5 px-2 border-b border-white/[0.04] text-foreground/70 ${cellIndex === 0 ? "text-[#32d583]/85" : ""}`}>
-                    {cell}
-                  </div>
-                )))}
+            <div key={index} className="overflow-hidden rounded-lg border border-white/[0.07] bg-[#0d120d]">
+              {block.title && <p className="border-b border-white/[0.06] px-4 py-3 text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</p>}
+              <div className="overflow-x-auto">
+                <table className="min-w-[720px] w-full border-collapse text-left text-[12px] leading-6">
+                  <thead className="bg-white/[0.035]">
+                    <tr>
+                      {block.columns.map(column => (
+                        <th key={column} className="border-b border-white/[0.08] px-4 py-3 font-medium text-muted-foreground">
+                          {column}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {block.rows.map((row, rowIndex) => (
+                      <tr key={row.join("-")} className="border-b border-white/[0.045] last:border-b-0">
+                        {row.map((cell, cellIndex) => (
+                          <td key={`${rowIndex}-${cellIndex}`} className={`px-4 py-3 align-top text-foreground/74 ${cellIndex === 0 ? "font-medium text-[#32d583]/85" : ""}`}>
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           );
@@ -312,36 +328,38 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "figure") {
           return (
-            <figure key={index} className="space-y-2">
+            <figure key={index} className="space-y-3 py-1">
               {block.title && <figcaption className="text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</figcaption>}
               <ArticleFigure block={block} />
-              {block.caption && <p className="text-[11px] text-muted-foreground leading-5">{block.caption}</p>}
+              {block.caption && <p className="text-[12px] leading-5 text-muted-foreground">{block.caption}</p>}
             </figure>
           );
         }
 
         if (block.type === "chart-placeholder" || block.type === "diagram-placeholder") {
           return (
-            <figure key={index} className="space-y-2">
+            <figure key={index} className="space-y-3 py-1">
               <figcaption className="text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</figcaption>
-              <FigurePlaceholder block={block} />
-              {block.caption && <p className="text-[11px] text-muted-foreground leading-5">{block.caption}</p>}
+              <div className="rounded-lg border border-white/[0.08] bg-[#0d120d] p-2">
+                <FigurePlaceholder block={block} />
+              </div>
+              {block.caption && <p className="text-[12px] leading-5 text-muted-foreground">{block.caption}</p>}
             </figure>
           );
         }
 
         if (block.type === "checklist") {
           return (
-            <section key={index} className="bg-card border border-white/[0.06] rounded-lg p-4 space-y-2">
-              {block.title && <p className="text-[11px] text-muted-foreground uppercase tracking-wide mb-3">{block.title}</p>}
+            <section key={index} className="space-y-3 rounded-lg border border-white/[0.07] bg-[#111611] p-4 sm:p-5">
+              {block.title && <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</p>}
               {block.items.map(item => (
-                <div key={item.text} className="flex items-start gap-2">
-                  <span className="mt-0.5 flex-shrink-0">
-                    {item.level === "green" ? <CheckSquare size={13} className="text-[#32d583]" /> :
-                      item.level === "red" ? <AlertCircle size={13} className="text-[#ef4444]" /> :
-                        <AlertCircle size={13} className="text-[#f59e0b]" />}
+                <div key={item.text} className="flex items-start gap-3">
+                  <span className="mt-1 flex-shrink-0">
+                    {item.level === "green" ? <CheckSquare size={14} className="text-[#32d583]/80" /> :
+                      item.level === "red" ? <AlertCircle size={14} className="text-[#ef4444]/85" /> :
+                        <AlertCircle size={14} className="text-[#f59e0b]/85" />}
                   </span>
-                  <p className="text-[12px] text-foreground/70 leading-relaxed">{item.text}</p>
+                  <p className="text-[13px] leading-6 text-foreground/74">{item.text}</p>
                 </div>
               ))}
             </section>
@@ -350,8 +368,8 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "quote") {
           return (
-            <blockquote key={index} className="bg-[#191f19] border border-white/[0.06] rounded-lg p-4">
-              <p className="text-[13px] text-foreground leading-7 italic">"{block.text}"</p>
+            <blockquote key={index} className="rounded-lg border border-white/[0.07] bg-[#191f19] p-4 sm:p-5">
+              <p className="text-sm leading-7 text-foreground/88 italic">"{block.text}"</p>
               {block.attribution && <p className="text-[11px] text-muted-foreground mt-2">{block.attribution}</p>}
             </blockquote>
           );
@@ -549,7 +567,7 @@ function ArticlePage({ article, onBack }: { article: Article; onBack: () => void
   const contents = content.filter((block): block is Extract<ArticleContentBlock, { type: "heading" }> => block.type === "heading");
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="mx-auto max-w-3xl px-4 py-7 pb-32 sm:px-6">
       <button onClick={onBack} className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-[#32d583] transition-colors mb-6">
         ← Back to Library
       </button>
