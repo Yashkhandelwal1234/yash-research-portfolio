@@ -1,4 +1,4 @@
-export type ArticleStatus = "Memo" | "Article" | "Market Map" | "Notes";
+export type ArticleStatus = "Published" | "Draft" | "Researching" | "Map" | "Memo";
 export type BuildStatus = "Planned" | "Building" | "Live";
 export type CoverArtVariant = "grid" | "orbits" | "flows" | "nodes" | "blocks";
 export type ArticleFigureVisual = "reserve-flow" | "rate-spread" | "agent-network" | "market-map";
@@ -70,6 +70,7 @@ export interface Dashboard {
 export interface ResearchPlaylist {
   slug: string;
   title: string;
+  category: string;
   count: number;
   description: string;
   color: string;

@@ -58,10 +58,11 @@ type Page = "home" | "library" | "article" | "agents" | "dashboards" | "about" |
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const statusColor: Record<ArticleStatus, string> = {
+  Published: "#60a5fa",
+  Draft: "#f59e0b",
+  Researching: "#8b978e",
+  Map: "#a78bfa",
   Memo: "#32d583",
-  Article: "#60a5fa",
-  "Market Map": "#a78bfa",
-  Notes: "#8b978e",
 };
 
 const buildStatusColor: Record<BuildStatus, string> = {
@@ -416,7 +417,7 @@ function ArticleCard({ article, onClick }: { article: Article; onClick: () => vo
 // ─── Playlist Row ─────────────────────────────────────────────────────────────
 
 function PlaylistRow({ playlist, onSelect }: { playlist: ResearchPlaylist; onSelect: () => void }) {
-  const rowArticles = articles.filter(a => a.category === playlist.title);
+  const rowArticles = articles.filter(a => a.category === playlist.category);
   return (
     <div className="group">
       <div className="flex items-center justify-between mb-3">
@@ -647,16 +648,16 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
               <button onClick={() => onArticleClick(articles[0])} className="flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium text-foreground bg-white/7 border border-white/10 hover:bg-white/10 transition-colors">
                 Latest Memo <ArrowRight size={13} />
               </button>
-              <span className="text-[11px] text-muted-foreground">{articles.length} published items · {dashboards.length} dashboards</span>
+              <span className="text-[11px] text-muted-foreground">{articles.length} research items · {dashboards.length} dashboards</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Recently Published */}
+      {/* Recent Research */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-foreground">Recently Published</h2>
+          <h2 className="text-base font-semibold text-foreground">Recent Research</h2>
           <button onClick={() => onNavigate("library")} className="text-[11px] text-muted-foreground hover:text-[#32d583] transition-colors flex items-center gap-1">
             View all <ChevronRight size={12} />
           </button>
@@ -711,7 +712,7 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
               <p className="text-[11px] text-muted-foreground">{agents.length} agents</p>
             </div>
           </div>
-          <p className="text-[12px] text-muted-foreground mb-3">Autonomous research tools — yield scanners, memo drafters, protocol monitors.</p>
+          <p className="text-[12px] text-muted-foreground mb-3">Planned and building workflows for collecting sources, drafting memos, and checking claims.</p>
           <div className="flex flex-wrap gap-1">
             {agents.slice(0, 3).map(a => <MetaTag key={a.slug} label={a.name.split(" ")[0]} />)}
           </div>
@@ -729,7 +730,7 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
               <p className="text-[11px] text-muted-foreground">{dashboards.length} dashboards</p>
             </div>
           </div>
-          <p className="text-[12px] text-muted-foreground mb-3">Live data dashboards — stablecoin yields, protocol revenue, MEV flows.</p>
+          <p className="text-[12px] text-muted-foreground mb-3">Research dashboards for turning portfolio questions into evidence.</p>
           <div className="flex flex-wrap gap-1">
             {dashboards.slice(0, 3).map(d => <MetaTag key={d.slug} label={d.tool} />)}
           </div>
@@ -760,7 +761,7 @@ function LibraryPage({ onArticleClick }: { onArticleClick: (a: Article) => void 
     <div className="px-4 py-6">
       <div className="mb-6">
         <h1 className="text-xl  font-semibold text-foreground mb-1">Research Library</h1>
-        <p className="text-[13px] text-muted-foreground">{articles.length} memos, articles, and maps</p>
+        <p className="text-[13px] text-muted-foreground">{articles.length} research items across memos, maps, and drafts</p>
       </div>
 
       {/* Filters */}
@@ -775,7 +776,7 @@ function LibraryPage({ onArticleClick }: { onArticleClick: (a: Article) => void 
           />
         </div>
         <div className="flex gap-1">
-          {(["All", "Memo", "Article", "Market Map", "Notes"] as const).map(f => (
+          {(["All", "Published", "Draft", "Researching", "Map", "Memo"] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`px-2.5 py-1 rounded text-[11px]  transition-colors ${filter === f ? "bg-[#32d583] text-[#061006]" : "bg-[#1b211b] text-muted-foreground hover:text-foreground border border-white/[0.06]"}`}>
               {f}
@@ -786,10 +787,10 @@ function LibraryPage({ onArticleClick }: { onArticleClick: (a: Article) => void 
 
       {/* Sector filter */}
       <div className="flex gap-1 mb-5 flex-wrap">
-        {["All", ...playlists.map(p => p.title)].map(s => (
-          <button key={s} onClick={() => setCategory(s)}
-            className={`px-2 py-0.5 rounded text-[10px]  transition-colors ${category === s ? "text-[#32d583] bg-[#32d583]/10 border border-[#32d583]/20" : "text-muted-foreground bg-[#1b211b] border border-white/[0.06] hover:text-foreground"}`}>
-            {s}
+        {[{ label: "All", value: "All" }, ...playlists.map(p => ({ label: p.title, value: p.category }))].map(s => (
+          <button key={s.value} onClick={() => setCategory(s.value)}
+            className={`px-2 py-0.5 rounded text-[10px]  transition-colors ${category === s.value ? "text-[#32d583] bg-[#32d583]/10 border border-[#32d583]/20" : "text-muted-foreground bg-[#1b211b] border border-white/[0.06] hover:text-foreground"}`}>
+            {s.label}
           </button>
         ))}
       </div>
@@ -825,9 +826,9 @@ function AboutPage() {
       </div>
 
       <div className="space-y-5 text-[13px] text-muted-foreground leading-7  mb-8">
-        <p>I research DeFi protocols, stablecoin mechanics, and on-chain market structure — with a focus on translating complex mechanism designs into investment frameworks that actually hold up under stress.</p>
-        <p>My work sits at the intersection of macro, fixed income, and crypto-native protocol analysis. I approach DeFi the way a credit analyst would approach a structured product: follow the cash flows, model the failure modes, find where the market is mispriced.</p>
-        <p>Alongside research, I build data tools — Dune dashboards, AI research agents, and monitoring systems — because better evidence leads to better theses.</p>
+        <p>I research DeFi protocols, stablecoin yield systems, fixed-income primitives, and on-chain market structure.</p>
+        <p>This portfolio is a public research library: memos, maps, dashboard ideas, and research agents that support source-backed analysis.</p>
+        <p>The work is intentionally evidence-first. Drafts and lab projects are labeled as unfinished until the underlying research or tooling is ready.</p>
       </div>
 
       <div className="mb-8">
@@ -870,7 +871,7 @@ function ContactPage() {
   return (
     <div className="max-w-md mx-auto px-4 py-6">
       <h1 className="text-xl  font-semibold text-foreground mb-1">Get in Touch</h1>
-      <p className="text-[13px] text-muted-foreground mb-6">Research collaborations, feedback, or just a good crypto conversation.</p>
+      <p className="text-[13px] text-muted-foreground mb-6">Research collaborations, source suggestions, or feedback on the public research library.</p>
 
       {sent ? (
         <div className="text-center py-12">
@@ -1179,7 +1180,7 @@ export default function App() {
               <div className="px-4 py-6">
                 <div className="mb-6">
                   <h1 className="text-xl  font-semibold text-foreground mb-1">Dashboard Lab</h1>
-                  <p className="text-[13px] text-muted-foreground">Live data views answering the questions behind the memos.</p>
+                  <p className="text-[13px] text-muted-foreground">Planned and building research views for the questions behind the memos.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {dashboards.map(d => (

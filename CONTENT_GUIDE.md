@@ -16,13 +16,21 @@ Required fields:
   tags: ["DeFi", "Stablecoins"],
   date: "2025-01-20",
   readTime: 12,
-  status: "Memo",
+  status: "Draft",
   category: "Stablecoin Yield",
   content: []
 }
 ```
 
 Use a unique `slug`; dashboards link to articles through `relatedArticleSlug`.
+
+Allowed article statuses:
+
+- `Published`: source-backed article that is ready to present as finished.
+- `Draft`: article shell or working draft that is not finished.
+- `Researching`: active research placeholder or notes.
+- `Map`: market map or category map.
+- `Memo`: investment memo or representative memo draft.
 
 ## Place An Image Between Paragraphs
 
