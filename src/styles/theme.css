@@ -2,80 +2,80 @@
 
 :root {
   --font-size: 15px;
-  --background: #090b09;
-  --foreground: #f1f5f1;
-  --card: #151915;
-  --card-foreground: #f1f5f1;
-  --popover: #191f19;
-  --popover-foreground: #f1f5f1;
-  --primary: #32d583;
-  --primary-foreground: #061006;
-  --secondary: #1f251f;
-  --secondary-foreground: #f1f5f1;
-  --muted: #181d18;
-  --muted-foreground: #8b978e;
-  --accent: #32d583;
-  --accent-foreground: #061006;
-  --destructive: #ef4444;
-  --destructive-foreground: #fff7f7;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: #1d241d;
-  --input-background: #171c17;
-  --switch-background: #2b332c;
+  --background: #121212;
+  --foreground: #FFFFFF;
+  --card: #181818;
+  --card-foreground: #FFFFFF;
+  --popover: #181818;
+  --popover-foreground: #FFFFFF;
+  --primary: #1ED760;
+  --primary-foreground: #000000;
+  --secondary: #282828;
+  --secondary-foreground: #FFFFFF;
+  --muted: #282828;
+  --muted-foreground: #B3B3B3;
+  --accent: #1ED760;
+  --accent-foreground: #000000;
+  --destructive: #B3B3B3;
+  --destructive-foreground: #000000;
+  --border: rgba(255, 255, 255, 0.07);
+  --input: #282828;
+  --input-background: #181818;
+  --switch-background: #535353;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: rgba(50, 213, 131, 0.42);
-  --chart-1: #32d583;
-  --chart-2: #60a5fa;
-  --chart-3: #a78bfa;
-  --chart-4: #f59e0b;
-  --chart-5: #f472b6;
+  --ring: rgba(30, 215, 96, 0.42);
+  --chart-1: #1ED760;
+  --chart-2: #B3B3B3;
+  --chart-3: #535353;
+  --chart-4: #282828;
+  --chart-5: #FFFFFF;
   --radius: 0.5rem;
-  --sidebar: #060806;
-  --sidebar-foreground: #f1f5f1;
-  --sidebar-primary: #32d583;
-  --sidebar-primary-foreground: #061006;
-  --sidebar-accent: #151b15;
-  --sidebar-accent-foreground: #f1f5f1;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
-  --sidebar-ring: rgba(50, 213, 131, 0.42);
+  --sidebar: #121212;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #1ED760;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #282828;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --sidebar-ring: rgba(30, 215, 96, 0.42);
 }
 
 .dark {
-  --background: #090b09;
-  --foreground: #f1f5f1;
-  --card: #151915;
-  --card-foreground: #f1f5f1;
-  --popover: #191f19;
-  --popover-foreground: #f1f5f1;
-  --primary: #32d583;
-  --primary-foreground: #061006;
-  --secondary: #1f251f;
-  --secondary-foreground: #f1f5f1;
-  --muted: #181d18;
-  --muted-foreground: #8b978e;
-  --accent: #32d583;
-  --accent-foreground: #061006;
-  --destructive: #ef4444;
-  --destructive-foreground: #fff7f7;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: #1d241d;
-  --ring: rgba(50, 213, 131, 0.42);
+  --background: #121212;
+  --foreground: #FFFFFF;
+  --card: #181818;
+  --card-foreground: #FFFFFF;
+  --popover: #181818;
+  --popover-foreground: #FFFFFF;
+  --primary: #1ED760;
+  --primary-foreground: #000000;
+  --secondary: #282828;
+  --secondary-foreground: #FFFFFF;
+  --muted: #282828;
+  --muted-foreground: #B3B3B3;
+  --accent: #1ED760;
+  --accent-foreground: #000000;
+  --destructive: #B3B3B3;
+  --destructive-foreground: #000000;
+  --border: rgba(255, 255, 255, 0.07);
+  --input: #282828;
+  --ring: rgba(30, 215, 96, 0.42);
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --chart-1: #32d583;
-  --chart-2: #60a5fa;
-  --chart-3: #a78bfa;
-  --chart-4: #f59e0b;
-  --chart-5: #f472b6;
-  --sidebar: #060806;
-  --sidebar-foreground: #f1f5f1;
-  --sidebar-primary: #32d583;
-  --sidebar-primary-foreground: #061006;
-  --sidebar-accent: #151b15;
-  --sidebar-accent-foreground: #f1f5f1;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
-  --sidebar-ring: rgba(50, 213, 131, 0.42);
+  --chart-1: #1ED760;
+  --chart-2: #B3B3B3;
+  --chart-3: #535353;
+  --chart-4: #282828;
+  --chart-5: #FFFFFF;
+  --sidebar: #121212;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #1ED760;
+  --sidebar-primary-foreground: #000000;
+  --sidebar-accent: #282828;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --sidebar-ring: rgba(30, 215, 96, 0.42);
 }
 
 @theme inline {
@@ -126,7 +126,7 @@
 
 	  body {
 	    @apply bg-background text-foreground;
-	    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	    font-family: 'DM Sans', sans-serif;
 	  }
 
   /**
@@ -179,4 +179,92 @@
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #121212; }
+::-webkit-scrollbar-thumb { background: #535353; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #B3B3B3; }
+
+.live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #1ED760;
+  display: inline-block;
+  margin-right: 8px;
+  animation: livepulse 2s ease-in-out infinite;
+}
+
+@keyframes livepulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.card-play-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #1ED760;
+  color: #000000;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.card:hover .card-play-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.track-row .track-play {
+  display: none;
+}
+
+.track-row:hover .track-number {
+  display: none;
+}
+
+.track-row:hover .track-play {
+  display: inline-flex;
+}
+
+.reading-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  min-width: 24px;
+  height: 14px;
+}
+
+.reading-bars span {
+  width: 3px;
+  border-radius: 999px;
+  background: #1ED760;
+  animation: readingbar 0.9s ease-in-out infinite;
+}
+
+.reading-bars span:nth-child(1) { height: 7px; animation-delay: 0s; }
+.reading-bars span:nth-child(2) { height: 13px; animation-delay: 0.15s; }
+.reading-bars span:nth-child(3) { height: 9px; animation-delay: 0.3s; }
+
+@keyframes readingbar {
+  0%, 100% { transform: scaleY(0.45); }
+  50% { transform: scaleY(1); }
+}
+
+.shelf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 16px;
 }

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, type MouseEvent } from "react";
 import {
   Home,
   BookOpen,
@@ -15,7 +15,6 @@ import {
   Pause,
   SkipForward,
   SkipBack,
-  Volume2,
   ListChecks,
   Bookmark,
   TrendingUp,
@@ -57,25 +56,26 @@ type Page = "home" | "library" | "article" | "agents" | "dashboards" | "about" |
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const statusColor: Record<ArticleStatus, string> = {
-  Published: "#60a5fa",
-  Draft: "#f59e0b",
-  Researching: "#8b978e",
-  Map: "#a78bfa",
-  Memo: "#32d583",
-};
-
 const buildStatusColor: Record<BuildStatus, string> = {
-  Live: "#32d583",
-  Building: "#f59e0b",
-  Planned: "#8b978e",
+  Live: "#1ED760",
+  Building: "#B3B3B3",
+  Planned: "#B3B3B3",
 };
 
 const buildStatusDot: Record<BuildStatus, string> = {
-  Live: "bg-[#32d583]",
-  Building: "bg-[#f59e0b]",
-  Planned: "bg-[#8b978e]",
+  Live: "bg-[#1ED760]",
+  Building: "bg-[#535353]",
+  Planned: "bg-[#535353]",
 };
+
+const SPOTIFY_COVER_COLORS = ["#181818", "#1ED760", "#535353"] as const;
+
+function formatReadTime(progress: number, readTime: number) {
+  const totalSeconds = Math.max(1, Math.round(readTime * 60));
+  const elapsedSeconds = Math.round(totalSeconds * Math.max(0, Math.min(100, progress)) / 100);
+  const format = (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+  return { elapsed: format(elapsedSeconds), total: format(totalSeconds) };
+}
 
 function formatDate(d: string) {
   return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -84,7 +84,7 @@ function formatDate(d: string) {
 function getArticleCover(article: Article): CoverArtMetadata {
   return article.coverArt ?? articleCoverPresets[article.category] ?? {
     variant: "grid",
-    colors: ["#102016", "#32d583", "#60a5fa"],
+    colors: [...SPOTIFY_COVER_COLORS],
     label: "RX",
   };
 }
@@ -145,8 +145,7 @@ function getArticleContent(article: Article): ArticleContentBlock[] {
 function StatusBadge({ status }: { status: ArticleStatus }) {
   return (
     <span
-      className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium tracking-wide uppercase"
-      style={{ color: statusColor[status], backgroundColor: statusColor[status] + "18", border: `1px solid ${statusColor[status]}30` }}
+      className="inline-flex items-center rounded-sm bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#B3B3B3]"
     >
       {status}
     </span>
@@ -155,8 +154,8 @@ function StatusBadge({ status }: { status: ArticleStatus }) {
 
 function BuildBadge({ status }: { status: BuildStatus }) {
   return (
-    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-medium tracking-wide uppercase"
-      style={{ color: buildStatusColor[status], backgroundColor: buildStatusColor[status] + "15", border: `1px solid ${buildStatusColor[status]}28` }}>
+    <span className="inline-flex items-center gap-1.5 rounded-sm bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em]"
+      style={{ color: buildStatusColor[status] }}>
       <span className={`w-1.5 h-1.5 rounded-full ${buildStatusDot[status]}`} />
       {status}
     </span>
@@ -165,7 +164,7 @@ function BuildBadge({ status }: { status: BuildStatus }) {
 
 function MetaTag({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] text-[#8b978e] bg-[#1d241d] border border-white/5">
+    <span className="inline-flex items-center rounded-sm bg-white/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.1em] text-[#B3B3B3]">
       {label}
     </span>
   );
@@ -173,6 +172,7 @@ function MetaTag({ label }: { label: string }) {
 
 function ResearchCoverArt({ article, className = "", compact = false }: { article: Article; className?: string; compact?: boolean }) {
   const cover = getArticleCover(article);
+  const colors = SPOTIFY_COVER_COLORS;
   const isNodes = cover.variant === "nodes";
   const isBlocks = cover.variant === "blocks";
 
@@ -180,14 +180,14 @@ function ResearchCoverArt({ article, className = "", compact = false }: { articl
     <div
       className={`relative overflow-hidden rounded-md border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] ${className}`}
       style={{
-        background: `linear-gradient(135deg, ${cover.colors[0]} 0%, ${cover.colors[1]} 58%, ${cover.colors[2]} 100%)`,
+        background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 58%, ${colors[2]} 100%)`,
       }}
       aria-hidden="true"
     >
       <div
         className="absolute inset-0 opacity-80"
         style={{
-          background: `radial-gradient(circle at 20% 18%, rgba(255,255,255,0.35), transparent 22%), radial-gradient(circle at 82% 76%, ${cover.colors[2]}99, transparent 28%), linear-gradient(120deg, transparent 0 42%, rgba(255,255,255,0.18) 43% 45%, transparent 46% 100%)`,
+          background: `radial-gradient(circle at 20% 18%, rgba(255,255,255,0.35), transparent 22%), radial-gradient(circle at 82% 76%, ${colors[2]}99, transparent 28%), linear-gradient(120deg, transparent 0 42%, rgba(255,255,255,0.18) 43% 45%, transparent 46% 100%)`,
         }}
       />
       {cover.variant === "grid" && (
@@ -233,10 +233,10 @@ function ResearchCoverArt({ article, className = "", compact = false }: { articl
 }
 
 function FigurePlaceholder({ block }: { block: { visual?: ArticleFigureVisual } }) {
-  const tone = block.visual === "agent-network" ? "#a78bfa" : block.visual === "market-map" ? "#fb7185" : block.visual === "rate-spread" ? "#60a5fa" : "#32d583";
+  const tone = "#1ED760";
 
   return (
-    <div className="relative h-64 overflow-hidden rounded-md bg-[#0d120d] sm:h-72">
+    <div className="relative h-64 overflow-hidden rounded-md bg-[#181818] sm:h-72">
       <div
         className="absolute inset-0 opacity-70"
         style={{ background: `radial-gradient(circle at 22% 20%, ${tone}44, transparent 28%), radial-gradient(circle at 74% 70%, ${tone}24, transparent 32%), linear-gradient(135deg, rgba(255,255,255,0.05), transparent)` }}
@@ -261,7 +261,7 @@ function ArticleFigure({ block }: { block: Extract<ArticleContentBlock, { type: 
   }
 
   return (
-    <div className="rounded-lg border border-white/[0.08] bg-[#0d120d] p-2">
+    <div className="rounded-lg border border-white/[0.07] bg-[#181818] p-2">
       <img
         src={block.src}
         alt={block.alt}
@@ -285,9 +285,9 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
         }
 
         if (block.type === "callout") {
-          const tone = block.tone === "warning" ? "#f59e0b" : block.tone === "info" ? "#60a5fa" : "#32d583";
+          const tone = block.tone === "warning" ? "#B3B3B3" : "#1ED760";
           return (
-            <div key={index} className="rounded-lg border border-white/[0.07] border-l-2 bg-[#101610] p-4 sm:p-5" style={{ borderLeftColor: tone }}>
+            <div key={index} className="rounded-lg border border-white/[0.07] border-l-2 bg-[#181818] p-4 sm:p-5" style={{ borderLeftColor: tone }}>
               {block.label && <p className="mb-2 text-[11px] uppercase tracking-wide" style={{ color: tone }}>{block.label}</p>}
               <p className="text-sm leading-7 text-foreground/88">{block.text}</p>
             </div>
@@ -296,7 +296,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "table") {
           return (
-            <div key={index} className="overflow-hidden rounded-lg border border-white/[0.07] bg-[#0d120d]">
+            <div key={index} className="overflow-hidden rounded-lg border border-white/[0.07] bg-[#181818]">
               {block.title && <p className="border-b border-white/[0.06] px-4 py-3 text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</p>}
               <div className="overflow-x-auto">
                 <table className="min-w-[720px] w-full border-collapse text-left text-[12px] leading-6">
@@ -313,7 +313,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
                     {block.rows.map((row, rowIndex) => (
                       <tr key={row.join("-")} className="border-b border-white/[0.045] last:border-b-0">
                         {row.map((cell, cellIndex) => (
-                          <td key={`${rowIndex}-${cellIndex}`} className={`px-4 py-3 align-top text-foreground/74 ${cellIndex === 0 ? "font-medium text-[#32d583]/85" : ""}`}>
+                          <td key={`${rowIndex}-${cellIndex}`} className={`px-4 py-3 align-top text-foreground/74 ${cellIndex === 0 ? "font-medium text-[#1ED760]" : ""}`}>
                             {cell}
                           </td>
                         ))}
@@ -340,7 +340,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
           return (
             <figure key={index} className="space-y-3 py-1">
               <figcaption className="text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</figcaption>
-              <div className="rounded-lg border border-white/[0.08] bg-[#0d120d] p-2">
+              <div className="rounded-lg border border-white/[0.07] bg-[#181818] p-2">
                 <FigurePlaceholder block={block} />
               </div>
               {block.caption && <p className="text-[12px] leading-5 text-muted-foreground">{block.caption}</p>}
@@ -350,14 +350,13 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "checklist") {
           return (
-            <section key={index} className="space-y-3 rounded-lg border border-white/[0.07] bg-[#111611] p-4 sm:p-5">
+            <section key={index} className="space-y-3 rounded-lg border border-white/[0.07] bg-[#181818] p-4 sm:p-5">
               {block.title && <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</p>}
               {block.items.map(item => (
                 <div key={item.text} className="flex items-start gap-3">
                   <span className="mt-1 flex-shrink-0">
-                    {item.level === "green" ? <CheckSquare size={14} className="text-[#32d583]/80" /> :
-                      item.level === "red" ? <AlertCircle size={14} className="text-[#ef4444]/85" /> :
-                        <AlertCircle size={14} className="text-[#f59e0b]/85" />}
+                    {item.level === "green" ? <CheckSquare size={14} className="text-[#1ED760]" /> :
+                      <AlertCircle size={14} className="text-[#B3B3B3]" />}
                   </span>
                   <p className="text-[13px] leading-6 text-foreground/74">{item.text}</p>
                 </div>
@@ -368,7 +367,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "quote") {
           return (
-            <blockquote key={index} className="rounded-lg border border-white/[0.07] bg-[#191f19] p-4 sm:p-5">
+            <blockquote key={index} className="rounded-lg border border-white/[0.07] bg-[#181818] p-4 sm:p-5">
               <p className="text-sm leading-7 text-foreground/88 italic">"{block.text}"</p>
               {block.attribution && <p className="text-[11px] text-muted-foreground mt-2">{block.attribution}</p>}
             </blockquote>
@@ -402,32 +401,70 @@ function ArticleCard({ article, onClick }: { article: Article; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="group text-left w-full bg-card border border-white/[0.06] rounded-lg p-3 hover:bg-[#1b211b] hover:border-[#32d583]/20 transition-all duration-200"
+      className="card group relative w-full cursor-pointer rounded-lg bg-[#181818] p-4 text-left transition-colors duration-200 hover:bg-[#282828]"
     >
-      <div className="flex gap-3">
-        <ResearchCoverArt article={article} compact className="w-16 h-16 flex-shrink-0" />
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-3 mb-1.5">
-            <h3 className="text-sm font-medium text-foreground leading-snug group-hover:text-[#32d583] transition-colors">
-              {article.title}
-            </h3>
-            <StatusBadge status={article.status} />
-          </div>
-          <p className="text-[12px] text-muted-foreground leading-relaxed mb-2 line-clamp-2">
-            {article.thesis}
-          </p>
-          <div className="flex flex-wrap gap-1 mb-2">
-            {article.tags.slice(0, 3).map(t => <MetaTag key={t} label={t} />)}
-          </div>
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
-            <span className="flex items-center gap-1"><Calendar size={10} />{formatDate(article.date)}</span>
-            <span className="flex items-center gap-1"><Clock size={10} />{article.readTime} min</span>
-            <span className="ml-auto flex items-center gap-1 text-[#32d583] opacity-0 group-hover:opacity-100 transition-opacity">
-              Open <ArrowRight size={10} />
-            </span>
-          </div>
+      <div className="relative mb-4 aspect-square w-full overflow-hidden rounded">
+        <ResearchCoverArt article={article} compact className="h-full w-full rounded border-0" />
+        <span className="card-play-btn" aria-hidden="true">
+          <Play size={20} fill="currentColor" className="ml-0.5" />
+        </span>
+      </div>
+      <div className="space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug text-[#FFFFFF]">
+            {article.title}
+          </h3>
+          <StatusBadge status={article.status} />
+        </div>
+        <p className="line-clamp-2 text-sm leading-6 text-[#B3B3B3]">
+          {article.thesis}
+        </p>
+        <div className="flex flex-wrap gap-1">
+          {article.tags.slice(0, 2).map(t => <MetaTag key={t} label={t} />)}
+        </div>
+        <div className="flex items-center gap-2 text-[12px] text-[#B3B3B3]">
+          <span>{article.category}</span>
+          <span className="text-[#535353]">·</span>
+          <span>{formatDate(article.date)}</span>
+          <span className="ml-auto flex items-center gap-1"><Clock size={11} />{article.readTime}m</span>
         </div>
       </div>
+    </button>
+  );
+}
+
+function TrackMarker({ index, active = false }: { index: number; active?: boolean }) {
+  if (active) {
+    return (
+      <span className="reading-bars flex-shrink-0" aria-label="Currently reading">
+        <span />
+        <span />
+        <span />
+      </span>
+    );
+  }
+
+  return (
+    <span className="relative inline-flex min-w-6 justify-center text-[13px] text-[#B3B3B3]">
+      <span className="track-number">{index}</span>
+      <span className="track-play hidden min-w-6 justify-center text-[#FFFFFF]" aria-hidden="true">▶</span>
+    </span>
+  );
+}
+
+function ArticleTrackRow({ article, index, onClick, active = false }: { article: Article; index: number; onClick: () => void; active?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      className="track-row group flex w-full items-center gap-3 border-b border-white/[0.07] px-2 py-2.5 text-left transition-colors hover:rounded hover:bg-[#282828]"
+    >
+      <TrackMarker index={index} active={active} />
+      <ResearchCoverArt article={article} compact className="h-10 w-10 flex-shrink-0 rounded border-0" />
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium leading-tight text-[#FFFFFF]">{article.title.split(":")[0]}</p>
+        <p className="truncate text-[12px] leading-5 text-[#B3B3B3]">{article.category}</p>
+      </div>
+      <span className="ml-auto flex-shrink-0 text-[12px] text-[#B3B3B3]">{article.readTime}m</span>
     </button>
   );
 }
@@ -440,30 +477,22 @@ function PlaylistRow({ playlist, onSelect, onArticleClick }: { playlist: Researc
 
   return (
     <div className="group">
-      <div className="flex items-center justify-between mb-3">
+      <div className="shelf-header">
         <div className="flex items-center gap-2">
           <span className="w-6 h-6 rounded flex items-center justify-center text-[10px]"
-            style={{ backgroundColor: playlist.color + "20", color: playlist.color, border: `1px solid ${playlist.color}30` }}>
+            style={{ backgroundColor: "#282828", color: "#1ED760", border: "1px solid rgba(255,255,255,0.07)" }}>
             {getPlaylistIcon(playlist.icon)}
           </span>
-          <h2 className="text-sm font-medium text-foreground">{playlist.title}</h2>
-          <span className="text-[11px] text-muted-foreground">{itemLabel}</span>
+          <h2 className="text-[22px] font-bold text-[#FFFFFF]">{playlist.title}</h2>
+          <span className="text-[12px] text-[#B3B3B3]">{itemLabel}</span>
         </div>
-        <button onClick={onSelect} className="text-[11px] text-muted-foreground hover:text-[#32d583] transition-colors flex items-center gap-1">
+        <button onClick={onSelect} className="flex items-center gap-1 text-[12px] font-bold uppercase tracking-[0.05em] text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]">
           View all <ChevronRight size={12} />
         </button>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-        {rowArticles.slice(0, 3).map(a => (
-          <button key={a.slug} onClick={() => onArticleClick(a)} className="flex items-start gap-2 p-2.5 rounded-md hover:bg-[#1b211b] cursor-pointer group/item transition-colors border border-transparent hover:border-[#32d583]/10 text-left">
-            <ResearchCoverArt article={a} compact className="w-9 h-9 flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-medium text-foreground truncate group-hover/item:text-[#32d583] transition-colors leading-snug">
-                {a.title.split(":")[0]}
-              </p>
-              <p className="text-[10px] text-muted-foreground">{a.readTime} min · {a.status}</p>
-            </div>
-          </button>
+      <div className="grid grid-cols-1 gap-1 lg:grid-cols-3 lg:gap-3">
+        {rowArticles.slice(0, 3).map((a, index) => (
+          <ArticleTrackRow key={a.slug} article={a} index={index + 1} onClick={() => onArticleClick(a)} />
         ))}
       </div>
     </div>
@@ -474,11 +503,11 @@ function PlaylistRow({ playlist, onSelect, onArticleClick }: { playlist: Researc
 
 function AgentCard({ agent }: { agent: Agent }) {
   return (
-    <div className="bg-card border border-white/[0.06] rounded-lg p-4 hover:border-[#32d583]/18 hover:bg-[#1b211b] transition-all">
+    <div className="rounded-lg bg-[#181818] p-4 transition-colors hover:bg-[#282828]">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-md bg-[#32d583]/10 border border-[#32d583]/20 flex items-center justify-center">
-            <Zap size={14} className="text-[#32d583]" />
+          <div className="w-8 h-8 rounded-md bg-[#282828] border border-white/[0.07] flex items-center justify-center">
+            <Zap size={14} className="text-[#1ED760]" />
           </div>
           <h3 className="text-sm font-medium text-foreground">{agent.name}</h3>
         </div>
@@ -487,11 +516,11 @@ function AgentCard({ agent }: { agent: Agent }) {
       <p className="text-[12px] text-muted-foreground mb-1.5 leading-relaxed">{agent.problem}</p>
       <p className="text-[12px] text-foreground/70 mb-3 leading-relaxed">{agent.whatItDoes}</p>
       <div className="grid grid-cols-2 gap-2 mb-3">
-        <div className="bg-[#0d120d] rounded p-2 border border-white/5">
+        <div className="bg-[#282828] rounded p-2 border border-white/[0.07]">
           <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wide">Inputs</p>
           {agent.inputs.map(i => <p key={i} className="text-[11px] text-foreground/70">{i}</p>)}
         </div>
-        <div className="bg-[#0d120d] rounded p-2 border border-white/5">
+        <div className="bg-[#282828] rounded p-2 border border-white/[0.07]">
           <p className="text-[10px] text-muted-foreground mb-1 uppercase tracking-wide">Outputs</p>
           {agent.outputs.map(o => <p key={o} className="text-[11px] text-foreground/70">{o}</p>)}
         </div>
@@ -501,12 +530,12 @@ function AgentCard({ agent }: { agent: Agent }) {
       </div>
       <div className="flex gap-2">
         {agent.githubUrl && (
-          <a href={agent.githubUrl} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-[#32d583] transition-colors">
+          <a href={agent.githubUrl} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors">
             <Github size={11} /> GitHub
           </a>
         )}
         {agent.demoUrl && (
-          <a href={agent.demoUrl} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-[#32d583] transition-colors">
+          <a href={agent.demoUrl} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors">
             <ExternalLink size={11} /> Demo
           </a>
         )}
@@ -521,14 +550,14 @@ function AgentCard({ agent }: { agent: Agent }) {
 // ─── Dashboard Card ───────────────────────────────────────────────────────────
 
 function DashboardCard({ dash, onArticleClick }: { dash: Dashboard; onArticleClick: () => void }) {
-  const color = dash.preview?.colors[1] ?? "#32d583";
+  const color = "#1ED760";
 
   return (
-    <div className="bg-card border border-white/[0.06] rounded-lg overflow-hidden hover:border-[#32d583]/18 transition-all group">
+    <div className="rounded-lg bg-[#181818] overflow-hidden transition-colors hover:bg-[#282828] group">
       <div className="h-24 flex items-center justify-center relative overflow-hidden"
-        style={{ backgroundColor: color + "10", borderBottom: `1px solid ${color}20` }}>
+        style={{ backgroundColor: "#282828", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at 30% 50%, ${color}40, transparent 70%)` }} />
-        <BarChart2 size={32} style={{ color: color + "60" }} className="relative z-10" />
+        <BarChart2 size={32} style={{ color }} className="relative z-10" />
         <div className="absolute bottom-2 right-2">
           <BuildBadge status={dash.status} />
         </div>
@@ -542,7 +571,7 @@ function DashboardCard({ dash, onArticleClick }: { dash: Dashboard; onArticleCli
         </div>
         <div className="flex gap-2">
           {dash.status === "Live" && (
-            <button className="flex-1 py-1.5 text-[11px] font-medium rounded text-[#32d583] bg-[#32d583]/10 border border-[#32d583]/20 hover:bg-[#32d583]/15 transition-colors flex items-center justify-center gap-1">
+            <button className="flex-1 py-1.5 text-[11px] font-medium rounded text-[#000000] bg-[#1ED760] hover:bg-[#1DB954] transition-colors flex items-center justify-center gap-1">
               <ExternalLink size={10} /> Open Dashboard
             </button>
           )}
@@ -552,7 +581,7 @@ function DashboardCard({ dash, onArticleClick }: { dash: Dashboard; onArticleCli
             </button>
           )}
           {dash.relatedArticleSlug && (
-            <button onClick={onArticleClick} aria-label={`Open related article for ${dash.title}`} className="px-2 py-1.5 text-[11px] text-muted-foreground hover:text-[#32d583] transition-colors rounded border border-white/5 hover:border-white/10">
+            <button onClick={onArticleClick} aria-label={`Open related article for ${dash.title}`} className="px-2 py-1.5 text-[11px] text-[#B3B3B3] hover:text-[#FFFFFF] transition-colors rounded border border-white/[0.07] hover:border-white/[0.15]">
               <FileText size={11} />
             </button>
           )}
@@ -570,7 +599,7 @@ function ArticlePage({ article, onBack, onArticleClick }: { article: Article; on
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-7 pb-32 sm:px-6">
-      <button onClick={onBack} className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-[#32d583] transition-colors mb-6">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-[12px] text-[#B3B3B3] hover:text-[#FFFFFF] transition-colors mb-6">
         ← Back to Library
       </button>
 
@@ -598,8 +627,8 @@ function ArticlePage({ article, onBack, onArticleClick }: { article: Article; on
       </div>
 
       {/* One-line conclusion */}
-      <div className="bg-[#32d583]/08 border-l-2 border-[#32d583] rounded-r-lg p-4 mb-6">
-        <p className="text-[11px] text-[#32d583] uppercase tracking-wide mb-1">One-line Conclusion</p>
+      <div className="bg-[#181818] border-l-2 border-[#1ED760] rounded-r-lg p-4 mb-6">
+        <p className="text-[11px] text-[#1ED760] uppercase tracking-wide mb-1">One-line Conclusion</p>
         <p className="text-sm text-foreground leading-6">
           {article.conclusion ?? article.thesis}
         </p>
@@ -623,16 +652,10 @@ function ArticlePage({ article, onBack, onArticleClick }: { article: Article; on
 
       {/* Related Research */}
       <div className="border-t border-white/[0.07] pt-6">
-        <p className="text-[11px] text-muted-foreground uppercase tracking-wide mb-3">Related Research</p>
-        <div className="grid grid-cols-1 gap-2">
-          {articles.filter(a => a.slug !== article.slug).slice(0, 3).map(a => (
-            <button key={a.slug} onClick={() => onArticleClick(a)} className="flex items-start gap-3 p-3 rounded-lg hover:bg-[#1b211b] cursor-pointer transition-colors border border-transparent hover:border-[#32d583]/10 text-left">
-              <ResearchCoverArt article={a} compact className="w-9 h-9 flex-shrink-0" />
-              <div>
-                <p className="text-[12px] font-medium text-foreground hover:text-[#32d583] transition-colors">{a.title}</p>
-                <p className="text-[11px] text-muted-foreground">{formatDate(a.date)} · {a.readTime} min</p>
-              </div>
-            </button>
+        <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.1em] text-[#B3B3B3]">Related Research</p>
+        <div className="grid grid-cols-1 gap-1">
+          {articles.filter(a => a.slug !== article.slug).slice(0, 3).map((a, index) => (
+            <ArticleTrackRow key={a.slug} article={a} index={index + 1} onClick={() => onArticleClick(a)} />
           ))}
         </div>
       </div>
@@ -644,31 +667,38 @@ function ArticlePage({ article, onBack, onArticleClick }: { article: Article; on
 
 function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article) => void; onNavigate: (p: Page) => void }) {
   return (
-    <div className="px-4 py-6 space-y-10">
+    <div className="space-y-10 px-4 py-6 sm:px-6">
       {/* Hero */}
-      <div className="relative rounded-xl overflow-hidden p-6 sm:p-8 bg-[#101510] border border-[#32d583]/12">
-        <div className="absolute inset-0 opacity-70" style={{ background: "radial-gradient(ellipse at 12% 0%, rgba(50,213,131,0.22) 0%, transparent 48%), linear-gradient(180deg, rgba(255,255,255,0.04), transparent)" }} />
-        <div className="relative z-10 flex flex-col sm:flex-row gap-6 sm:items-end">
-          <ResearchCoverArt article={articles[0]} className="w-32 h-32 sm:w-40 sm:h-40 flex-shrink-0" />
+      <div className="relative overflow-hidden rounded-xl p-6 sm:p-8" style={{ background: "linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, #121212 55%)" }}>
+        <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-end">
+          <ResearchCoverArt article={articles[0]} className="h-32 w-32 flex-shrink-0 sm:h-40 sm:w-40" />
           <div className="min-w-0">
-            <p className="text-[11px] text-[#32d583] uppercase tracking-widest mb-3">Research Portfolio</p>
-            <h1 className="text-3xl font-bold text-foreground leading-tight mb-2">
+            <p className="mb-3 flex items-center text-[11px] font-bold uppercase tracking-[0.15em] text-[#1ED760]">
+              <span className="live-dot" aria-hidden="true" />▶ NOW READING · RESEARCH PORTFOLIO
+            </p>
+            <h1 className="mb-2 text-[40px] font-black leading-none tracking-[-1px] text-[#FFFFFF] sm:text-[56px]">
               Yash Khandelwal
             </h1>
-            <p className="text-base font-medium text-foreground/85 mb-3">
+            <p className="mb-3 text-base font-medium text-[#B3B3B3]">
               Web3 / DeFi Investment Research Analyst
             </p>
-            <p className="text-[13px] text-muted-foreground max-w-xl leading-relaxed mb-5">
-              Crypto market memos, DeFi protocol analysis, dashboards, and research agents organized as a working analyst library.
+            <p className="mb-5 max-w-[520px] text-sm leading-[1.6] text-[#B3B3B3]">
+              I research what others haven't priced yet. Two years in DeFi protocols, validator economics, and quant strategy — building stress-testing engines and onchain theses before the crowd catches on. Five years active across spot and derivatives. Based in Jaipur. Currently open to investment research roles.
             </p>
-            <div className="flex flex-wrap items-center gap-3">
-              <button onClick={() => onNavigate("library")} className="flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold text-[#061006] bg-[#32d583] hover:bg-[#49e99a] transition-colors">
-                <BookOpen size={14} /> Browse Research
+            <div className="mb-4 flex flex-wrap items-center gap-3">
+              <button onClick={() => onNavigate("library")} className="rounded-full bg-[#1ED760] px-8 py-3 text-sm font-bold text-[#000000] transition duration-150 hover:scale-[1.03] hover:bg-[#1DB954] active:scale-[0.98]">
+                ▶ Browse Research
               </button>
-              <button onClick={() => onArticleClick(articles[0])} className="flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-medium text-foreground bg-white/7 border border-white/10 hover:bg-white/10 transition-colors">
-                Latest Memo <ArrowRight size={13} />
-              </button>
-              <span className="text-[11px] text-muted-foreground">{articles.length} research items · {dashboards.length} dashboards</span>
+              <a href="https://linkedin.com/in/yash-khandelwal-76384b227" target="_blank" rel="noreferrer" className="rounded-full border-[1.5px] border-[#B3B3B3] px-7 py-[11px] text-sm font-bold text-[#FFFFFF] transition duration-150 hover:border-[#FFFFFF]">
+                + Follow
+              </a>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-[13px] text-[#B3B3B3]">
+              <span><strong className="font-bold text-[#FFFFFF]">8</strong> Research Items</span>
+              <span className="text-[#535353]">·</span>
+              <span><strong className="font-bold text-[#FFFFFF]">900+</strong> Community Built</span>
+              <span className="text-[#535353]">·</span>
+              <span><strong className="font-bold text-[#FFFFFF]">5+</strong> Yrs Trading</span>
             </div>
           </div>
         </div>
@@ -676,9 +706,9 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
 
       {/* Recent Research */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-foreground">Recent Research</h2>
-          <button onClick={() => onNavigate("library")} className="text-[11px] text-muted-foreground hover:text-[#32d583] transition-colors flex items-center gap-1">
+        <div className="shelf-header">
+          <h2 className="text-[22px] font-bold text-[#FFFFFF]">Recent Research</h2>
+          <button onClick={() => onNavigate("library")} className="flex items-center gap-1 text-[12px] font-bold uppercase tracking-[0.05em] text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]">
             View all <ChevronRight size={12} />
           </button>
         </div>
@@ -689,8 +719,11 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
 
       {/* Research Playlists */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-foreground">Research Themes</h2>
+        <div className="shelf-header">
+          <h2 className="text-[22px] font-bold text-[#FFFFFF]">Research Themes</h2>
+          <button onClick={() => onNavigate("library")} className="flex items-center gap-1 text-[12px] font-bold uppercase tracking-[0.05em] text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]">
+            View all <ChevronRight size={12} />
+          </button>
         </div>
         <div className="space-y-8">
           {playlists.map(pl => (
@@ -701,31 +734,23 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
 
       {/* Featured Memos */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-foreground">Featured Memos</h2>
+        <div className="shelf-header">
+          <h2 className="text-[22px] font-bold text-[#FFFFFF]">Featured Memos</h2>
+          <button onClick={() => onNavigate("library")} className="flex items-center gap-1 text-[12px] font-bold uppercase tracking-[0.05em] text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]">
+            View all <ChevronRight size={12} />
+          </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {articles.filter(a => a.featured).map(a => (
-            <button key={a.slug} onClick={() => onArticleClick(a)} className="group text-left bg-card border border-white/[0.06] rounded-lg overflow-hidden hover:border-[#32d583]/30 transition-all">
-              <ResearchCoverArt article={a} className="h-24 rounded-none border-x-0 border-t-0" />
-              <div className="p-4">
-                <div className="mb-2"><StatusBadge status={a.status} /></div>
-                <h3 className="text-[13px] font-medium text-foreground mb-1 group-hover:text-[#32d583] transition-colors leading-snug line-clamp-2">
-                  {a.title}
-                </h3>
-                <p className="text-[11px] text-muted-foreground">{a.readTime} min · {formatDate(a.date)}</p>
-              </div>
-            </button>
-          ))}
+          {articles.filter(a => a.featured).map(a => <ArticleCard key={a.slug} article={a} onClick={() => onArticleClick(a)} />)}
         </div>
       </div>
 
       {/* Lab Previews */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-card border border-white/[0.06] rounded-lg p-5 hover:border-[#32d583]/20 transition-all group cursor-pointer" onClick={() => onNavigate("agents")}>
+        <div className="cursor-pointer rounded-lg bg-[#181818] p-5 transition-colors hover:bg-[#282828] group" onClick={() => onNavigate("agents")}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-lg bg-[#32d583]/10 border border-[#32d583]/20 flex items-center justify-center">
-              <Cpu size={16} className="text-[#32d583]" />
+            <div className="w-9 h-9 rounded-lg bg-[#1ED760]/10 border border-white/[0.07] flex items-center justify-center">
+              <Cpu size={16} className="text-[#1ED760]" />
             </div>
             <div>
               <h3 className="text-sm font-medium text-foreground">AI Agents Lab</h3>
@@ -736,14 +761,14 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
           <div className="flex flex-wrap gap-1">
             {agents.slice(0, 3).map(a => <MetaTag key={a.slug} label={a.name.split(" ")[0]} />)}
           </div>
-          <div className="flex items-center gap-1 mt-3 text-[11px] text-[#32d583] opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 mt-3 text-[11px] text-[#1ED760] opacity-0 group-hover:opacity-100 transition-opacity">
             Explore Lab <ArrowRight size={11} />
           </div>
         </div>
-        <div className="bg-card border border-white/[0.06] rounded-lg p-5 hover:border-[#60a5fa]/20 transition-all group cursor-pointer" onClick={() => onNavigate("dashboards")}>
+        <div className="cursor-pointer rounded-lg bg-[#181818] p-5 transition-colors hover:bg-[#282828] group" onClick={() => onNavigate("dashboards")}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-lg bg-[#60a5fa]/10 border border-[#60a5fa]/20 flex items-center justify-center">
-              <BarChart2 size={16} className="text-[#60a5fa]" />
+            <div className="w-9 h-9 rounded-lg bg-[#1ED760]/10 border border-white/[0.07] flex items-center justify-center">
+              <BarChart2 size={16} className="text-[#1ED760]" />
             </div>
             <div>
               <h3 className="text-sm font-medium text-foreground">Dashboard Lab</h3>
@@ -754,7 +779,7 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
           <div className="flex flex-wrap gap-1">
             {dashboards.slice(0, 3).map(d => <MetaTag key={d.slug} label={d.tool} />)}
           </div>
-          <div className="flex items-center gap-1 mt-3 text-[11px] text-[#60a5fa] opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 mt-3 text-[11px] text-[#1ED760] opacity-0 group-hover:opacity-100 transition-opacity">
             Explore Lab <ArrowRight size={11} />
           </div>
         </div>
@@ -791,13 +816,13 @@ function LibraryPage({ onArticleClick, search, onSearchChange }: { onArticleClic
             value={search}
             onChange={e => onSearchChange(e.target.value)}
             placeholder="Search memos..."
-            className="w-full h-8 pl-8 pr-3 rounded-md bg-[#1b211b] border border-white/[0.07] text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#32d583]/40  transition-colors"
+            className="w-full h-8 pl-8 pr-3 rounded-md bg-[#282828] border border-white/[0.07] text-[13px] text-[#FFFFFF] placeholder:text-[#B3B3B3] focus:outline-none focus:border-white/[0.15] transition-colors"
           />
         </div>
         <div className="flex gap-1">
           {(["All", "Published", "Draft", "Researching", "Map", "Memo"] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)}
-              className={`px-2.5 py-1 rounded text-[11px]  transition-colors ${filter === f ? "bg-[#32d583] text-[#061006]" : "bg-[#1b211b] text-muted-foreground hover:text-foreground border border-white/[0.06]"}`}>
+              className={`px-2.5 py-1 rounded text-[11px] transition-colors ${filter === f ? "bg-[#1ED760] text-[#000000]" : "bg-[#282828] text-[#B3B3B3] hover:text-[#FFFFFF] border border-white/[0.07]"}`}>
               {f}
             </button>
           ))}
@@ -808,7 +833,7 @@ function LibraryPage({ onArticleClick, search, onSearchChange }: { onArticleClic
       <div className="flex gap-1 mb-5 flex-wrap">
         {[{ label: "All", value: "All" }, ...playlists.map(p => ({ label: p.title, value: p.category }))].map(s => (
           <button key={s.value} onClick={() => setCategory(s.value)}
-            className={`px-2 py-0.5 rounded text-[10px]  transition-colors ${category === s.value ? "text-[#32d583] bg-[#32d583]/10 border border-[#32d583]/20" : "text-muted-foreground bg-[#1b211b] border border-white/[0.06] hover:text-foreground"}`}>
+            className={`px-2 py-0.5 rounded text-[10px] transition-colors ${category === s.value ? "text-[#000000] bg-[#1ED760]" : "text-[#B3B3B3] bg-[#282828] border border-white/[0.07] hover:text-[#FFFFFF]"}`}>
             {s.label}
           </button>
         ))}
@@ -831,15 +856,15 @@ function AboutPage() {
   return (
     <div className="max-w-xl mx-auto px-4 py-6">
       <div className="flex items-start gap-5 mb-8 pb-6 border-b border-white/[0.07]">
-        <div className="w-16 h-16 rounded-full bg-[#32d583]/15 border border-[#32d583]/25 flex items-center justify-center flex-shrink-0">
-          <span className="text-xl  font-semibold text-[#32d583]">YK</span>
+        <div className="w-16 h-16 rounded-full bg-[#282828] border border-white/[0.07] flex items-center justify-center flex-shrink-0">
+          <span className="text-xl font-semibold text-[#1ED760]">YK</span>
         </div>
         <div>
           <h1 className="text-xl  font-semibold text-foreground">Yash Khandelwal</h1>
           <p className="text-[13px] text-muted-foreground">Web3 / DeFi Investment Research Analyst</p>
           <div className="flex gap-3 mt-2">
-            <a href="#" className="text-[11px]  text-muted-foreground hover:text-[#32d583] transition-colors flex items-center gap-1"><Github size={11} /> GitHub</a>
-            <a href="#" className="text-[11px]  text-muted-foreground hover:text-[#32d583] transition-colors flex items-center gap-1"><Globe size={11} /> Twitter</a>
+            <a href="#" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><Github size={11} /> GitHub</a>
+            <a href="#" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><Globe size={11} /> Twitter</a>
           </div>
         </div>
       </div>
@@ -854,8 +879,8 @@ function AboutPage() {
         <p className="text-[11px]  text-muted-foreground uppercase tracking-wide mb-4">Focus Areas</p>
         <div className="grid grid-cols-2 gap-2">
           {["Stablecoin Yield Mechanics", "DeFi Fixed Income", "On-chain Market Structure", "Protocol Revenue Analysis", "Agent-Payment Infrastructure", "Consumer Crypto Finance"].map(f => (
-            <div key={f} className="flex items-center gap-2 text-[12px] text-foreground/70 p-2 rounded bg-[#151915] border border-white/[0.05]">
-              <span className="w-1 h-1 rounded-full bg-[#32d583] flex-shrink-0" />
+            <div key={f} className="flex items-center gap-2 text-[12px] text-foreground/70 p-2 rounded bg-[#181818] border border-white/[0.07]">
+              <span className="w-1 h-1 rounded-full bg-[#1ED760] flex-shrink-0" />
               {f}
             </div>
           ))}
@@ -871,7 +896,7 @@ function AboutPage() {
           ].map(e => (
             <div key={e.role} className="border-l border-white/[0.07] pl-4">
               <p className="text-[13px] font-medium text-foreground">{e.role}</p>
-              <p className="text-[11px]  text-[#32d583] mb-1">{e.org} · {e.period}</p>
+              <p className="text-[11px] text-[#1ED760] mb-1">{e.org} · {e.period}</p>
               <p className="text-[12px] text-muted-foreground">{e.desc}</p>
             </div>
           ))}
@@ -892,15 +917,15 @@ function ContactPage() {
       <h1 className="text-xl  font-semibold text-foreground mb-1">Get in Touch</h1>
       <p className="text-[13px] text-muted-foreground mb-6">Research collaborations, source suggestions, or feedback on the public research library.</p>
 
-      <div className="mb-5 rounded-lg border border-white/[0.07] bg-[#101610] p-4">
-        <p className="text-[11px] text-[#32d583] uppercase tracking-wide mb-1">Local Placeholder</p>
+      <div className="mb-5 rounded-lg border border-white/[0.07] bg-[#181818] p-4">
+        <p className="text-[11px] text-[#1ED760] uppercase tracking-wide mb-1">Local Placeholder</p>
         <p className="text-[12px] text-muted-foreground leading-6">
           This form is a local portfolio placeholder and does not send messages yet. Use the contact links below for real outreach.
         </p>
       </div>
 
       {notice && (
-        <div className="mb-4 rounded-lg border border-[#f59e0b]/25 bg-[#f59e0b]/10 p-3">
+        <div className="mb-4 rounded-lg border border-white/[0.07] bg-[#282828] p-3">
           <p className="text-[12px] text-foreground/80 leading-5">This form is not connected to a backend. Please use the contact links below.</p>
         </div>
       )}
@@ -918,7 +943,7 @@ function ContactPage() {
               value={form[field.key as keyof typeof form]}
               onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
               placeholder={field.placeholder}
-              className="w-full h-9 px-3 rounded-md bg-[#1b211b] border border-white/[0.07] text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#32d583]/40 transition-colors"
+              className="w-full h-9 px-3 rounded-md bg-[#282828] border border-white/[0.07] text-[13px] text-[#FFFFFF] placeholder:text-[#B3B3B3] focus:outline-none focus:border-white/[0.15] transition-colors"
             />
           </div>
         ))}
@@ -929,10 +954,10 @@ function ContactPage() {
             onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
             rows={4}
             placeholder="What are you working on?"
-            className="w-full px-3 py-2 rounded-md bg-[#1b211b] border border-white/[0.07] text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#32d583]/40 resize-none transition-colors"
+            className="w-full px-3 py-2 rounded-md bg-[#282828] border border-white/[0.07] text-[13px] text-[#FFFFFF] placeholder:text-[#B3B3B3] focus:outline-none focus:border-white/[0.15] resize-none transition-colors"
           />
         </div>
-        <button type="submit" className="w-full h-9 rounded-md bg-[#32d583] text-[#061006] text-[13px] font-medium hover:bg-[#49e99a] transition-colors">
+        <button type="submit" className="w-full h-9 rounded-full bg-[#1ED760] text-[#000000] text-[13px] font-bold hover:bg-[#1DB954] active:bg-[#158A3E] transition-colors">
           Show Contact Instructions
         </button>
       </form>
@@ -942,7 +967,7 @@ function ContactPage() {
         <div className="space-y-2">
           {[["Twitter / X", "@yashkhandelwal", Globe], ["GitHub", "github.com/yashkhandelwal", Github], ["Email", "yash@research.xyz", Mail]].map(([label, val, Icon]) => (
             <div key={label as string} className="flex items-center gap-3 text-[12px] text-muted-foreground">
-              <span className="w-6 h-6 rounded bg-[#1b211b] border border-white/[0.06] flex items-center justify-center">
+              <span className="w-6 h-6 rounded bg-[#282828] border border-white/[0.07] flex items-center justify-center">
                 {/* @ts-ignore */}
                 <Icon size={11} />
               </span>
@@ -972,10 +997,10 @@ function Sidebar({ current, onNavigate, collapsed }: { current: Page; onNavigate
     <aside className={`flex-shrink-0 bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 ${collapsed ? "w-14" : "w-14 sm:w-52"}`}>
       {/* Logo */}
       <div className={`flex items-center gap-2.5 py-5 border-b border-white/[0.05] ${collapsed ? "justify-center px-0" : "justify-center px-0 sm:justify-start sm:px-4"}`}>
-        <div className="w-7 h-7 rounded-md bg-[#32d583] flex items-center justify-center flex-shrink-0">
-          <BookOpen size={14} className="text-[#061006]" />
+        <div className="w-7 h-7 rounded-md bg-[#1ED760] flex items-center justify-center flex-shrink-0">
+          <BookOpen size={14} className="text-[#000000]" />
         </div>
-        {!collapsed && <span className="hidden sm:inline text-[13px]  font-medium text-foreground tracking-tight">research.xyz</span>}
+        {!collapsed && <span className="hidden sm:inline text-[13px] font-medium text-[#FFFFFF] tracking-tight">research.xyz</span>}
       </div>
 
       {/* Nav */}
@@ -984,7 +1009,7 @@ function Sidebar({ current, onNavigate, collapsed }: { current: Page; onNavigate
           const active = current === item.id || (current === "article" && item.id === "library");
           return (
             <button key={item.id} onClick={() => onNavigate(item.id)}
-              className={`w-full flex items-center gap-3 px-2 py-2 rounded-md text-[12px] font-medium transition-all ${active ? "bg-[#32d583]/12 text-[#32d583]" : "text-[#8b978e] hover:text-foreground hover:bg-white/[0.04]"} ${collapsed ? "justify-center" : "justify-center sm:justify-start"}`}>
+              className={`w-full flex items-center gap-3 px-2 py-2 rounded text-[12px] transition-colors ${active ? "font-medium text-[#1ED760]" : "font-medium text-[#B3B3B3] hover:bg-[#282828] hover:text-[#FFFFFF]"} ${collapsed ? "justify-center" : "justify-center sm:justify-start"}`}>
               <item.icon size={15} className="flex-shrink-0" />
               {!collapsed && <span className="hidden sm:inline">{item.label}</span>}
             </button>
@@ -994,15 +1019,22 @@ function Sidebar({ current, onNavigate, collapsed }: { current: Page; onNavigate
 
       {/* Library section */}
       {!collapsed && (
-        <div className="hidden sm:block px-3 pb-4 border-t border-white/[0.05] pt-3">
-          <p className="text-[10px]  text-muted-foreground uppercase tracking-wide px-1 mb-2">Research Themes</p>
-          <div className="space-y-0.5">
-            {playlists.map(pl => (
-              <div key={pl.slug} className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-[11px] text-muted-foreground">
-                <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: pl.color + "80" }} />
-                <span className="truncate">{pl.title}</span>
-              </div>
-            ))}
+        <div className="hidden sm:block border-t border-white/[0.05] px-3 pb-4 pt-3">
+          <p className="px-3 pb-2 pt-4 text-[11px] font-bold uppercase tracking-[0.1em] text-[#B3B3B3]">Your Library</p>
+          <div className="space-y-1">
+            {playlists.map(pl => {
+              const shelfArticle = articles.find(article => article.category === pl.category) ?? articles[0];
+              const count = articles.filter(article => article.category === pl.category).length;
+              return (
+                <div key={pl.slug} className="flex w-full items-center gap-3 rounded px-2 py-2 text-left transition-colors hover:bg-[#282828]">
+                  <ResearchCoverArt article={shelfArticle} compact className="h-10 w-10 flex-shrink-0 rounded border-0" />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm leading-tight text-[#FFFFFF]">{pl.title}</p>
+                    <p className="truncate text-[12px] leading-5 text-[#B3B3B3]">Playlist · {count} {count === 1 ? "item" : "items"}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -1012,43 +1044,38 @@ function Sidebar({ current, onNavigate, collapsed }: { current: Page; onNavigate
 
 // ─── Right Panel ──────────────────────────────────────────────────────────────
 
-function RightPanel({ onClose, onArticleClick }: { onClose: () => void; onArticleClick: (article: Article) => void }) {
+function RightPanel({ onClose, onArticleClick, activeArticle }: { onClose: () => void; onArticleClick: (article: Article) => void; activeArticle: Article }) {
+  const queueArticles = [activeArticle, ...articles.filter(a => a.slug !== activeArticle.slug)].slice(0, 4);
+
   return (
-    <aside className="hidden w-64 flex-shrink-0 bg-[#0d120d] border-l border-white/[0.05] md:flex flex-col">
+    <aside className="hidden w-64 flex-shrink-0 bg-[#121212] border-l border-white/[0.07] md:flex flex-col">
       <div className="flex items-center justify-between px-4 py-4 border-b border-white/[0.05]">
         <div className="flex items-center gap-2">
-          <ListChecks size={13} className="text-[#32d583]" />
-          <span className="text-[12px] font-medium text-foreground">Research Queue</span>
+          <ListChecks size={13} className="text-[#1ED760]" />
+          <span className="text-[12px] font-medium text-[#FFFFFF]">Research Queue</span>
         </div>
-        <button onClick={onClose} aria-label="Close research queue" className="text-muted-foreground hover:text-foreground transition-colors"><X size={13} /></button>
+        <button onClick={onClose} aria-label="Close research queue" className="text-[#B3B3B3] hover:text-[#FFFFFF] transition-colors"><X size={13} /></button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4 [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-4">
         {/* Next up */}
         <div>
-          <p className="text-[10px]  text-muted-foreground uppercase tracking-wide mb-2 px-1">Next Up</p>
+          <p className="text-[11px] font-bold text-[#B3B3B3] uppercase tracking-[0.1em] mb-2 px-1">Next Up</p>
           <div className="space-y-1">
-            {articles.slice(1, 4).map((a, i) => (
-              <button key={a.slug} onClick={() => onArticleClick(a)} className="w-full flex items-start gap-2 p-2 rounded hover:bg-[#1b211b] transition-colors cursor-pointer group text-left">
-                <span className="text-[10px]  text-muted-foreground w-4 pt-0.5 flex-shrink-0">{i + 1}</span>
-                <ResearchCoverArt article={a} compact className="w-8 h-8 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] text-foreground/80 group-hover:text-foreground line-clamp-2 leading-snug">{a.title.split(":")[0]}</p>
-                  <p className="text-[10px]  text-muted-foreground mt-0.5">{a.readTime} min</p>
-                </div>
-              </button>
+            {queueArticles.map((a, i) => (
+              <ArticleTrackRow key={a.slug} article={a} index={i + 1} active={a.slug === activeArticle.slug} onClick={() => onArticleClick(a)} />
             ))}
           </div>
         </div>
 
         {/* Open Questions */}
         <div>
-          <p className="text-[10px]  text-muted-foreground uppercase tracking-wide mb-2 px-1">Open Questions</p>
+          <p className="text-[11px] font-bold text-[#B3B3B3] uppercase tracking-[0.1em] mb-2 px-1">Open Questions</p>
           <div className="space-y-2">
             {openQuestions.map((q, i) => (
-              <div key={i} className="flex items-start gap-2 p-2 rounded bg-[#151915] border border-white/[0.04]">
-                <Circle size={8} className="text-[#32d583] mt-1 flex-shrink-0" />
-                <p className="text-[11px] text-muted-foreground leading-relaxed">{q}</p>
+              <div key={i} className="flex items-start gap-2 p-2 rounded bg-[#181818] border border-white/[0.07]">
+                <Circle size={8} className="text-[#1ED760] mt-1 flex-shrink-0" />
+                <p className="text-[11px] text-[#B3B3B3] leading-relaxed">{q}</p>
               </div>
             ))}
           </div>
@@ -1056,12 +1083,12 @@ function RightPanel({ onClose, onArticleClick }: { onClose: () => void; onArticl
 
         {/* Recently saved */}
         <div>
-          <p className="text-[10px]  text-muted-foreground uppercase tracking-wide mb-2 px-1">Saved Sources</p>
+          <p className="text-[11px] font-bold text-[#B3B3B3] uppercase tracking-[0.1em] mb-2 px-1">Saved Sources</p>
           <div className="space-y-1">
             {savedSources.map(s => (
               <div key={s} className="flex items-center gap-2 p-2 rounded">
-                <ExternalLink size={9} className="text-muted-foreground flex-shrink-0" />
-                <span className="text-[11px] text-muted-foreground truncate">{s}</span>
+                <ExternalLink size={9} className="text-[#B3B3B3] flex-shrink-0" />
+                <span className="text-[11px] text-[#B3B3B3] truncate">{s}</span>
               </div>
             ))}
           </div>
@@ -1073,61 +1100,104 @@ function RightPanel({ onClose, onArticleClick }: { onClose: () => void; onArticl
 
 // ─── Bottom Bar ───────────────────────────────────────────────────────────────
 
-function NowReadingBar({ article, onOpen }: { article: Article; onOpen: () => void }) {
+function NowReadingBar({
+  article,
+  onOpen,
+  onPrevious,
+  onNext,
+  isArticlePage,
+  scrollContainerRef,
+}: {
+  article: Article;
+  onOpen: () => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  isArticlePage: boolean;
+  scrollContainerRef: { current: HTMLDivElement | null };
+}) {
   const [playing, setPlaying] = useState(true);
-  const [progress, setProgress] = useState(34);
+  const [progress, setProgress] = useState(0);
+  const time = formatReadTime(progress, article.readTime);
+
+  useEffect(() => {
+    if (!isArticlePage) {
+      setProgress(0);
+      return;
+    }
+
+    const scroller = scrollContainerRef.current;
+    if (!scroller) return;
+
+    const updateProgress = () => {
+      const scrollable = scroller.scrollHeight - scroller.clientHeight;
+      const nextProgress = scrollable <= 0 ? 100 : (scroller.scrollTop / scrollable) * 100;
+      setProgress(Math.max(0, Math.min(100, nextProgress)));
+    };
+
+    updateProgress();
+    scroller.addEventListener("scroll", updateProgress, { passive: true });
+    window.addEventListener("resize", updateProgress);
+
+    return () => {
+      scroller.removeEventListener("scroll", updateProgress);
+      window.removeEventListener("resize", updateProgress);
+    };
+  }, [article.slug, isArticlePage, scrollContainerRef]);
+
+  const handleProgressClick = (e: MouseEvent<HTMLDivElement>) => {
+    const scroller = scrollContainerRef.current;
+    if (!isArticlePage || !scroller) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const scrollable = scroller.scrollHeight - scroller.clientHeight;
+    scroller.scrollTo({ top: scrollable * ratio, behavior: "smooth" });
+  };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 h-16 bg-[#050705]/95 border-t border-white/[0.08] flex items-center px-2 sm:px-4 gap-2 sm:gap-4 z-50" style={{ backdropFilter: "blur(14px)" }}>
+    <div className="fixed bottom-0 left-0 right-0 z-[1000] flex h-[56px] items-center gap-2 border-t border-white/[0.07] bg-[#181818] px-2 sm:h-[72px] sm:px-4 sm:gap-4">
       {/* Article info */}
-      <div className="flex items-center gap-2 sm:gap-3 w-36 sm:w-64 min-w-0 flex-shrink-0">
-        <ResearchCoverArt article={article} compact className="w-10 h-10 flex-shrink-0" />
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:w-64 sm:flex-initial sm:flex-shrink-0 sm:gap-3">
+        <ResearchCoverArt article={article} compact className="h-10 w-10 flex-shrink-0 rounded border-0" />
         <div className="min-w-0">
-          <button onClick={onOpen} aria-label={`Open ${article.title}`} className="text-[12px] font-semibold text-foreground hover:text-[#32d583] transition-colors truncate block max-w-[84px] sm:max-w-[190px] leading-tight">
+          <button onClick={onOpen} aria-label={`Open ${article.title}`} className="block max-w-[190px] truncate text-left text-sm font-medium leading-tight text-[#FFFFFF] transition-colors hover:text-[#FFFFFF]">
             {article.title.split(":")[0]}
           </button>
-          <p className="text-[10px] text-muted-foreground truncate max-w-[84px] sm:max-w-[190px]">{article.category}</p>
+          <p className="hidden max-w-[190px] truncate text-[12px] text-[#B3B3B3] sm:block">{article.category}</p>
         </div>
-        <Bookmark size={13} className="text-[#32d583] flex-shrink-0 hidden sm:block" />
       </div>
 
       {/* Controls */}
-      <div className="min-w-0 flex-1 flex flex-col items-center gap-1 max-w-md mx-auto">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <button aria-label="Previous article" className="hidden sm:block text-muted-foreground hover:text-foreground transition-colors"><SkipBack size={14} /></button>
-          <button onClick={() => setPlaying(p => !p)} aria-label={playing ? "Pause reading session" : "Play reading session"} className="w-7 h-7 rounded-full bg-foreground flex items-center justify-center hover:scale-105 transition-transform">
-            {playing ? <Pause size={11} className="text-[#061006]" /> : <Play size={11} className="text-[#061006] ml-0.5" />}
+      <div className="flex min-w-0 flex-shrink-0 flex-col items-center gap-2 sm:mx-auto sm:max-w-md sm:flex-1">
+        <div className="flex items-center gap-6">
+          <button onClick={onPrevious} aria-label="Previous article" className="hidden text-[#B3B3B3] transition-colors hover:text-[#FFFFFF] sm:inline-flex"><SkipBack size={20} /></button>
+          <button onClick={() => setPlaying(p => !p)} aria-label={playing ? "Pause reading session" : "Play reading session"} className="flex h-8 w-8 items-center justify-center rounded-full text-[#FFFFFF] transition-transform hover:scale-105">
+            {playing ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
           </button>
-          <button aria-label="Next article" className="hidden sm:block text-muted-foreground hover:text-foreground transition-colors"><SkipForward size={14} /></button>
+          <button onClick={onNext} aria-label="Next article" className="hidden text-[#B3B3B3] transition-colors hover:text-[#FFFFFF] sm:inline-flex"><SkipForward size={20} /></button>
         </div>
-        <div className="w-full flex items-center gap-2">
-          <span className="hidden sm:inline text-[9px]  text-muted-foreground w-6 text-right">{Math.round(progress * article.readTime / 100)}m</span>
+        <div className="hidden w-full items-center gap-2 sm:flex">
+          <span className="w-10 text-right text-[12px] text-[#B3B3B3]">{time.elapsed}</span>
           <div
-            className="group flex-1 h-1 bg-white/10 rounded-full cursor-pointer overflow-hidden"
+            className="group h-1 flex-1 cursor-pointer overflow-hidden rounded-full bg-[#535353]"
             role="slider"
             aria-label="Reading progress"
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={progress}
-            onClick={e => { const r = e.currentTarget.getBoundingClientRect(); const next = Math.round((e.clientX - r.left) / r.width * 100); setProgress(Math.max(0, Math.min(100, next))); }}
+            aria-valuenow={Math.round(progress)}
+            onClick={handleProgressClick}
           >
-            <div className="h-full bg-[#32d583] rounded-full transition-all" style={{ width: `${progress}%` }} />
+            <div className="h-full rounded-full bg-[#FFFFFF] transition-all duration-200 group-hover:bg-[#1ED760]" style={{ width: `${progress}%` }} />
           </div>
-          <span className="hidden sm:inline text-[9px]  text-muted-foreground w-6">{article.readTime}m</span>
+          <span className="w-10 text-[12px] text-[#B3B3B3]">{time.total}</span>
         </div>
       </div>
 
       {/* Right */}
-      <div className="hidden md:flex items-center gap-3 w-52 justify-end flex-shrink-0">
-        <div className="flex items-center gap-1 text-[10px]  text-muted-foreground">
-          <StatusBadge status={article.status} />
-        </div>
-        <div className="flex items-center gap-1 text-muted-foreground" aria-label="Display volume">
-          <Volume2 size={13} />
-          <div className="w-14 h-0.5 bg-white/10 rounded-full">
-            <div className="h-full w-2/3 bg-white/30 rounded-full" />
-          </div>
-        </div>
+      <div className="hidden w-52 flex-shrink-0 items-center justify-end gap-3 md:flex">
+        <button aria-label="Bookmark current research" className="text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]">
+          <Bookmark size={20} />
+        </button>
+        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#535353]">Now Reading</p>
       </div>
     </div>
   );
@@ -1150,13 +1220,20 @@ export default function App() {
     mainRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleRelativeArticle = (offset: number) => {
+    const currentIndex = articles.findIndex(a => a.slug === activeArticle.slug);
+    const safeIndex = currentIndex === -1 ? 0 : currentIndex;
+    const nextIndex = (safeIndex + offset + articles.length) % articles.length;
+    handleArticleClick(articles[nextIndex]);
+  };
+
   const handleNavigate = (p: Page) => {
     setPage(p);
     mainRef.current?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden font-['Inter']" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="flex flex-col h-screen bg-background overflow-hidden" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       {/* Main layout above bottom bar */}
       <div className="flex flex-1 min-h-0">
         {/* Sidebar */}
@@ -1165,8 +1242,8 @@ export default function App() {
         {/* Center column */}
         <div className="flex-1 flex flex-col min-w-0">
           {/* Top bar */}
-          <header className="h-12 flex-shrink-0 flex items-center gap-3 px-4 border-b border-white/[0.05] bg-[#061006]/80 sticky top-0 z-40" style={{ backdropFilter: "blur(8px)" }}>
-            <button onClick={() => setSidebarCollapsed(c => !c)} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-white/[0.04]">
+          <header className="h-12 flex-shrink-0 flex items-center gap-3 px-4 border-b border-white/[0.07] bg-[#121212]/90 sticky top-0 z-40" style={{ backdropFilter: "blur(8px)" }}>
+            <button onClick={() => setSidebarCollapsed(c => !c)} aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} className="text-[#B3B3B3] hover:text-[#FFFFFF] transition-colors p-1 rounded hover:bg-[#282828]">
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="1" y="3" width="13" height="1.5" rx="0.75" fill="currentColor" /><rect x="1" y="7" width="13" height="1.5" rx="0.75" fill="currentColor" /><rect x="1" y="11" width="13" height="1.5" rx="0.75" fill="currentColor" /></svg>
             </button>
 
@@ -1176,22 +1253,22 @@ export default function App() {
                 value={globalSearch}
                 onChange={e => { setGlobalSearch(e.target.value); if (e.target.value && page !== "library") handleNavigate("library"); }}
                 placeholder="Search research..."
-                className="w-full h-7 pl-7 pr-3 rounded-md bg-[#1b211b] border border-white/[0.06] text-[12px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#32d583]/30  transition-colors"
+                className="w-full h-7 pl-7 pr-3 rounded-full bg-[#282828] border border-white/[0.07] text-[12px] text-[#FFFFFF] placeholder:text-[#B3B3B3] focus:outline-none focus:border-white/[0.15] transition-colors"
               />
             </div>
 
             <div className="flex items-center gap-1 ml-auto">
-              <button onClick={() => setRightPanelOpen(o => !o)} aria-label={rightPanelOpen ? "Hide research queue" : "Show research queue"} className={`hidden md:block p-1.5 rounded transition-colors ${rightPanelOpen ? "text-[#32d583] bg-[#32d583]/10" : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"}`}>
+              <button onClick={() => setRightPanelOpen(o => !o)} aria-label={rightPanelOpen ? "Hide research queue" : "Show research queue"} className={`hidden md:block p-1.5 rounded transition-colors ${rightPanelOpen ? "text-[#1ED760] bg-[#282828]" : "text-[#B3B3B3] hover:text-[#FFFFFF] hover:bg-[#282828]"}`}>
                 <PanelRight size={14} />
               </button>
-              <div className="w-6 h-6 rounded-full bg-[#32d583]/20 border border-[#32d583]/30 flex items-center justify-center ml-1">
-                <span className="text-[9px] font-medium text-[#32d583]">YK</span>
+              <div className="w-6 h-6 rounded-full bg-[#282828] border border-white/[0.07] flex items-center justify-center ml-1">
+                <span className="text-[9px] font-medium text-[#1ED760]">YK</span>
               </div>
             </div>
           </header>
 
           {/* Scrollable main content */}
-          <main ref={mainRef} className="flex-1 overflow-y-auto pb-20 [&::-webkit-scrollbar]:hidden">
+          <main ref={mainRef} className="flex-1 overflow-y-auto pb-20 sm:pb-24">
             {page === "home" && <HomePage onArticleClick={handleArticleClick} onNavigate={handleNavigate} />}
             {page === "library" && <LibraryPage onArticleClick={handleArticleClick} search={globalSearch} onSearchChange={setGlobalSearch} />}
             {page === "article" && <ArticlePage article={activeArticle} onBack={() => handleNavigate("library")} onArticleClick={handleArticleClick} />}
@@ -1228,11 +1305,18 @@ export default function App() {
         </div>
 
         {/* Right panel */}
-        {rightPanelOpen && <RightPanel onClose={() => setRightPanelOpen(false)} onArticleClick={handleArticleClick} />}
+        {rightPanelOpen && <RightPanel onClose={() => setRightPanelOpen(false)} onArticleClick={handleArticleClick} activeArticle={activeArticle} />}
       </div>
 
       {/* Bottom Now Reading bar */}
-      <NowReadingBar article={activeArticle} onOpen={() => { setPage("article"); mainRef.current?.scrollTo({ top: 0 }); }} />
+      <NowReadingBar
+        article={activeArticle}
+        onOpen={() => { setPage("article"); mainRef.current?.scrollTo({ top: 0 }); }}
+        onPrevious={() => handleRelativeArticle(-1)}
+        onNext={() => handleRelativeArticle(1)}
+        isArticlePage={page === "article"}
+        scrollContainerRef={mainRef}
+      />
     </div>
   );
 }
