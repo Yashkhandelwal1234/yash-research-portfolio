@@ -8,7 +8,6 @@ export const dashboards: Dashboard[] = [
     researchQuestion: "Which stablecoin yield questions should be tracked in a repeatable dashboard?",
     dataSources: ["Source list to be added"],
     tool: "Dune",
-    relatedArticleSlug: "stablecoin-sandwich-dollar-journey",
     preview: { variant: "flows", colors: ["#0f3b25", "#32d583", "#7dd3fc"], label: "SY" },
   },
   {
@@ -28,7 +27,6 @@ export const dashboards: Dashboard[] = [
     researchQuestion: "What source-backed fields are needed to compare protocol revenue and incentive durability?",
     dataSources: ["Source list to be added"],
     tool: "Python",
-    relatedArticleSlug: "protocol-revenue-incentive-durability",
     preview: { variant: "grid", colors: ["#422006", "#f59e0b", "#32d583"], label: "PR" },
   },
   {
@@ -38,7 +36,6 @@ export const dashboards: Dashboard[] = [
     researchQuestion: "What categories should structure a consumer crypto finance map before data collection starts?",
     dataSources: ["Source list to be added"],
     tool: "Observable",
-    relatedArticleSlug: "consumer-crypto-finance-map",
     preview: { variant: "orbits", colors: ["#064e3b", "#34d399", "#facc15"], label: "CC" },
   },
   {
@@ -48,7 +45,6 @@ export const dashboards: Dashboard[] = [
     researchQuestion: "What open questions define the agent-payment infrastructure research shelf?",
     dataSources: ["Source list to be added"],
     tool: "Custom",
-    relatedArticleSlug: "agent-payment-infrastructure-beyond-x402",
     preview: { variant: "nodes", colors: ["#1e1b4b", "#a78bfa", "#32d583"], label: "AI" },
   },
 ];

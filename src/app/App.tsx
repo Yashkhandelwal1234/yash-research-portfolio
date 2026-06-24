@@ -70,6 +70,46 @@ const buildStatusDot: Record<BuildStatus, string> = {
 
 const SPOTIFY_COVER_COLORS = ["#181818", "#1ED760", "#535353"] as const;
 
+const coverStylesByCategory: Record<string, { background: string; accent: string; label?: string }> = {
+  "Stablecoin Yield": { background: "#0a2a0a", accent: "#1ED760", label: "SY" },
+  "Prediction Markets": { background: "#1a0a2e", accent: "#a78bfa", label: "PM" },
+  "DeFi Fixed Income": { background: "#1a1200", accent: "#EF9F27", label: "FI" },
+  "Consumer Crypto": { background: "#001a2e", accent: "#60a5fa", label: "CC" },
+  "Agent Infrastructure": { background: "#1a0a0a", accent: "#f87171", label: "AI" },
+  "Market Structure": { background: "#001a1a", accent: "#2dd4bf", label: "MS" },
+  "Protocol Research": { background: "#141414", accent: "#B3B3B3", label: "PR" },
+};
+
+const coverStylesBySlug: Record<string, { background: string; accent: string; label?: string }> = {
+  "usdd-pendle-investment-memo": coverStylesByCategory["Stablecoin Yield"],
+  "stablecoin-card-account": coverStylesByCategory["Consumer Crypto"],
+  "stablecoins-not-built-on-debt": coverStylesByCategory["Protocol Research"],
+};
+
+const customCoverImagesBySlug: Record<string, string> = {
+  "usdd-pendle-investment-memo": "/research/usdd-pendle/usdd_pendle_cover_art.png",
+  "stablecoin-card-account": "/research/stablecoin-card-account/stablecoin_card_cover_art.png",
+  "stablecoins-not-built-on-debt": "/research/stablecoins-not-built-on-debt/stablecoins_not_debt_cover_art.png",
+};
+
+const PROFILE_IMAGE_SRC = "/profile/yash-profile.jpg";
+
+function getCoverStyle(article: Article) {
+  return coverStylesByCategory[article.category] ?? coverStylesBySlug[article.slug] ?? {
+    background: SPOTIFY_COVER_COLORS[0],
+    accent: SPOTIFY_COVER_COLORS[1],
+    label: article.coverArt?.label ?? "RX",
+  };
+}
+
+const articleBackedPlaylists = playlists.filter(playlist =>
+  articles.some(article => article.category === playlist.category)
+);
+
+const visibleArticleStatuses: ArticleStatus[] = (["Published", "Memo", "Draft", "Researching", "Map"] as ArticleStatus[]).filter(status =>
+  articles.some(article => article.status === status)
+);
+
 function formatReadTime(progress: number, readTime: number) {
   const totalSeconds = Math.max(1, Math.round(readTime * 60));
   const elapsedSeconds = Math.round(totalSeconds * Math.max(0, Math.min(100, progress)) / 100);
@@ -170,24 +210,68 @@ function MetaTag({ label }: { label: string }) {
   );
 }
 
+function ProfileAvatar({ className = "", compact = false }: { className?: string; compact?: boolean }) {
+  const [didError, setDidError] = useState(false);
+
+  return (
+    <div className={`relative overflow-hidden rounded-full border border-white/10 bg-[#282828] shadow-[inset_0_1px_0_rgba(255,255,255,0.16)] ${className}`}>
+      {!didError ? (
+        <img
+          src={PROFILE_IMAGE_SRC}
+          alt="Yash Khandelwal"
+          className="h-full w-full object-cover"
+          onError={() => setDidError(true)}
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center">
+          <span className={`${compact ? "text-[9px]" : "text-xl"} font-semibold text-[#1ED760]`}>YK</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ResearchCoverArt({ article, className = "", compact = false }: { article: Article; className?: string; compact?: boolean }) {
   const cover = getArticleCover(article);
-  const colors = SPOTIFY_COVER_COLORS;
+  const coverStyle = getCoverStyle(article);
+  const colors = [coverStyle.background, coverStyle.accent, "#535353"];
   const isNodes = cover.variant === "nodes";
   const isBlocks = cover.variant === "blocks";
+  const customCoverSrc = customCoverImagesBySlug[article.slug];
+  const [customCoverFailed, setCustomCoverFailed] = useState(false);
+
+  useEffect(() => {
+    setCustomCoverFailed(false);
+  }, [customCoverSrc]);
+
+  if (customCoverSrc && !customCoverFailed) {
+    return (
+      <div
+        className={`relative overflow-hidden rounded-md border border-white/10 bg-[#121212] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] ${className}`}
+        aria-hidden="true"
+      >
+        <img
+          src={customCoverSrc}
+          alt=""
+          className="h-full w-full object-cover"
+          onError={() => setCustomCoverFailed(true)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div
       className={`relative overflow-hidden rounded-md border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)] ${className}`}
       style={{
-        background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 58%, ${colors[2]} 100%)`,
+        background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 62%, ${colors[2]} 100%)`,
       }}
       aria-hidden="true"
     >
       <div
         className="absolute inset-0 opacity-80"
         style={{
-          background: `radial-gradient(circle at 20% 18%, rgba(255,255,255,0.35), transparent 22%), radial-gradient(circle at 82% 76%, ${colors[2]}99, transparent 28%), linear-gradient(120deg, transparent 0 42%, rgba(255,255,255,0.18) 43% 45%, transparent 46% 100%)`,
+          background: `radial-gradient(circle at 20% 18%, rgba(255,255,255,0.28), transparent 22%), radial-gradient(circle at 82% 76%, ${colors[1]}55, transparent 30%), linear-gradient(120deg, transparent 0 42%, rgba(255,255,255,0.16) 43% 45%, transparent 46% 100%)`,
         }}
       />
       {cover.variant === "grid" && (
@@ -222,10 +306,15 @@ function ResearchCoverArt({ article, className = "", compact = false }: { articl
           {[38, 58, 44, 76, 62].map((height, i) => <span key={i} className="flex-1 rounded-t bg-white/35" style={{ height: `${height}%` }} />)}
         </div>
       )}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className={`${compact ? "text-xl" : "text-3xl"} font-black tracking-tight text-white/85 drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]`}>
+          {coverStyle.label ?? cover.label ?? "RX"}
+        </span>
+      </div>
       {!compact && (
         <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between text-white/90">
-          <span className="text-[10px] font-semibold tracking-wide">{cover.label ?? "RX"}</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-white/80" />
+          <span className="text-[10px] font-semibold tracking-wide">{coverStyle.label ?? cover.label ?? "RX"}</span>
+          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: colors[1] }} />
         </div>
       )}
     </div>
@@ -274,20 +363,20 @@ function ArticleFigure({ block }: { block: Extract<ArticleContentBlock, { type: 
 
 function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
   return (
-    <div className="mb-12 space-y-7">
+    <div className="mb-12">
       {blocks.map((block, index) => {
         if (block.type === "heading") {
-          return <h2 key={index} className="pt-5 text-[17px] font-semibold leading-snug text-foreground first:pt-0">{block.text}</h2>;
+          return <h2 key={index} className="mb-3 mt-10 text-[20px] font-bold leading-snug text-foreground first:mt-0">{block.text}</h2>;
         }
 
         if (block.type === "paragraph") {
-          return <p key={index} className="text-sm leading-7 text-foreground/72 md:leading-8">{block.text}</p>;
+          return <p key={index} className="mb-[1.15rem] text-[15px] leading-[1.65] text-foreground/72">{block.text}</p>;
         }
 
         if (block.type === "callout") {
           const tone = block.tone === "warning" ? "#B3B3B3" : "#1ED760";
           return (
-            <div key={index} className="rounded-lg border border-white/[0.07] border-l-2 bg-[#181818] p-4 sm:p-5" style={{ borderLeftColor: tone }}>
+            <div key={index} className="my-6 rounded-lg border border-white/[0.07] border-l-2 bg-[#181818] p-4 sm:p-5" style={{ borderLeftColor: tone }}>
               {block.label && <p className="mb-2 text-[11px] uppercase tracking-wide" style={{ color: tone }}>{block.label}</p>}
               <p className="text-sm leading-7 text-foreground/88">{block.text}</p>
             </div>
@@ -296,7 +385,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "table") {
           return (
-            <div key={index} className="overflow-hidden rounded-lg border border-white/[0.07] bg-[#181818]">
+            <div key={index} className="my-6 overflow-hidden rounded-lg border border-white/[0.07] bg-[#181818]">
               {block.title && <p className="border-b border-white/[0.06] px-4 py-3 text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</p>}
               <div className="overflow-x-auto">
                 <table className="min-w-[720px] w-full border-collapse text-left text-[12px] leading-6">
@@ -328,7 +417,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "figure") {
           return (
-            <figure key={index} className="space-y-3 py-1">
+            <figure key={index} className="my-6 space-y-3">
               {block.title && <figcaption className="text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</figcaption>}
               <ArticleFigure block={block} />
               {block.caption && <p className="text-[12px] leading-5 text-muted-foreground">{block.caption}</p>}
@@ -338,7 +427,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "chart-placeholder" || block.type === "diagram-placeholder") {
           return (
-            <figure key={index} className="space-y-3 py-1">
+            <figure key={index} className="my-6 space-y-3">
               <figcaption className="text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</figcaption>
               <div className="rounded-lg border border-white/[0.07] bg-[#181818] p-2">
                 <FigurePlaceholder block={block} />
@@ -350,7 +439,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "checklist") {
           return (
-            <section key={index} className="space-y-3 rounded-lg border border-white/[0.07] bg-[#181818] p-4 sm:p-5">
+            <section key={index} className="my-6 space-y-3 rounded-lg border border-white/[0.07] bg-[#181818] p-4 sm:p-5">
               {block.title && <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{block.title}</p>}
               {block.items.map(item => (
                 <div key={item.text} className="flex items-start gap-3">
@@ -367,7 +456,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "quote") {
           return (
-            <blockquote key={index} className="rounded-lg border border-white/[0.07] bg-[#181818] p-4 sm:p-5">
+            <blockquote key={index} className="my-6 rounded-lg border border-white/[0.07] bg-[#181818] p-4 sm:p-5">
               <p className="text-sm leading-7 text-foreground/88 italic">"{block.text}"</p>
               {block.attribution && <p className="text-[11px] text-muted-foreground mt-2">{block.attribution}</p>}
             </blockquote>
@@ -376,7 +465,7 @@ function ArticleContent({ blocks }: { blocks: ArticleContentBlock[] }) {
 
         if (block.type === "sources") {
           return (
-            <section key={index}>
+            <section key={index} className="mt-8">
               <h2 className="text-base font-semibold text-foreground mb-2">Sources</h2>
               <div className="space-y-1.5">
                 {block.items.map(source => (
@@ -401,16 +490,16 @@ function ArticleCard({ article, onClick }: { article: Article; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="card group relative w-full cursor-pointer rounded-lg bg-[#181818] p-4 text-left transition-colors duration-200 hover:bg-[#282828]"
+      className="card group relative w-full cursor-pointer rounded-lg bg-[#181818] p-3 text-left transition-colors duration-200 hover:bg-[#282828]"
     >
-      <div className="relative mb-4 aspect-square w-full overflow-hidden rounded">
+      <div className="relative mb-3 aspect-square w-full overflow-hidden rounded">
         <ResearchCoverArt article={article} compact className="h-full w-full rounded border-0" />
         <span className="card-play-btn" aria-hidden="true">
           <Play size={20} fill="currentColor" className="ml-0.5" />
         </span>
       </div>
-      <div className="space-y-2">
-        <div className="flex items-start justify-between gap-3">
+      <div className="space-y-1.5">
+        <div className="flex items-start justify-between gap-2">
           <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug text-[#FFFFFF]">
             {article.title}
           </h3>
@@ -549,7 +638,7 @@ function AgentCard({ agent }: { agent: Agent }) {
 
 // ─── Dashboard Card ───────────────────────────────────────────────────────────
 
-function DashboardCard({ dash, onArticleClick }: { dash: Dashboard; onArticleClick: () => void }) {
+function DashboardCard({ dash, onArticleClick }: { dash: Dashboard; onArticleClick?: () => void }) {
   const color = "#1ED760";
 
   return (
@@ -580,7 +669,7 @@ function DashboardCard({ dash, onArticleClick }: { dash: Dashboard; onArticleCli
               In Progress
             </button>
           )}
-          {dash.relatedArticleSlug && (
+          {onArticleClick && (
             <button onClick={onArticleClick} aria-label={`Open related article for ${dash.title}`} className="px-2 py-1.5 text-[11px] text-[#B3B3B3] hover:text-[#FFFFFF] transition-colors rounded border border-white/[0.07] hover:border-white/[0.15]">
               <FileText size={11} />
             </button>
@@ -671,7 +760,7 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
       {/* Hero */}
       <div className="relative overflow-hidden rounded-xl p-6 sm:p-8" style={{ background: "linear-gradient(180deg, rgba(30, 215, 96, 0.12) 0%, #121212 55%)" }}>
         <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-end">
-          <ResearchCoverArt article={articles[0]} className="h-32 w-32 flex-shrink-0 sm:h-40 sm:w-40" />
+          <ProfileAvatar className="h-32 w-32 flex-shrink-0 sm:h-40 sm:w-40" />
           <div className="min-w-0">
             <p className="mb-3 flex items-center text-[11px] font-bold uppercase tracking-[0.15em] text-[#1ED760]">
               <span className="live-dot" aria-hidden="true" />▶ NOW READING · RESEARCH PORTFOLIO
@@ -689,12 +778,12 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
               <button onClick={() => onNavigate("library")} className="rounded-full bg-[#1ED760] px-8 py-3 text-sm font-bold text-[#000000] transition duration-150 hover:scale-[1.03] hover:bg-[#1DB954] active:scale-[0.98]">
                 ▶ Browse Research
               </button>
-              <a href="https://linkedin.com/in/yash-khandelwal-76384b227" target="_blank" rel="noreferrer" className="rounded-full border-[1.5px] border-[#B3B3B3] px-7 py-[11px] text-sm font-bold text-[#FFFFFF] transition duration-150 hover:border-[#FFFFFF]">
-                + Follow
+              <a href="/resume/yash-khandelwal-resume.pdf" target="_blank" rel="noreferrer" className="rounded-full border-[1.5px] border-[rgba(255,255,255,0.5)] bg-transparent px-7 py-[11px] text-sm font-bold text-[#FFFFFF] transition-[border-color] duration-150 hover:border-[#FFFFFF]">
+                Resume
               </a>
             </div>
             <div className="flex flex-wrap items-center gap-2 text-[13px] text-[#B3B3B3]">
-              <span><strong className="font-bold text-[#FFFFFF]">8</strong> Research Items</span>
+              <span><strong className="font-bold text-[#FFFFFF]">{articles.length}</strong> Research Items</span>
               <span className="text-[#535353]">·</span>
               <span><strong className="font-bold text-[#FFFFFF]">900+</strong> Community Built</span>
               <span className="text-[#535353]">·</span>
@@ -712,7 +801,7 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
             View all <ChevronRight size={12} />
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {articles.slice(0, 4).map(a => <ArticleCard key={a.slug} article={a} onClick={() => onArticleClick(a)} />)}
         </div>
       </div>
@@ -726,7 +815,7 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
           </button>
         </div>
         <div className="space-y-8">
-          {playlists.map(pl => (
+          {articleBackedPlaylists.map(pl => (
             <PlaylistRow key={pl.slug} playlist={pl} onSelect={() => onNavigate("library")} onArticleClick={onArticleClick} />
           ))}
         </div>
@@ -740,7 +829,7 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
             View all <ChevronRight size={12} />
           </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {articles.filter(a => a.featured).map(a => <ArticleCard key={a.slug} article={a} onClick={() => onArticleClick(a)} />)}
         </div>
       </div>
@@ -820,7 +909,7 @@ function LibraryPage({ onArticleClick, search, onSearchChange }: { onArticleClic
           />
         </div>
         <div className="flex gap-1">
-          {(["All", "Published", "Draft", "Researching", "Map", "Memo"] as const).map(f => (
+          {(["All", ...visibleArticleStatuses] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`px-2.5 py-1 rounded text-[11px] transition-colors ${filter === f ? "bg-[#1ED760] text-[#000000]" : "bg-[#282828] text-[#B3B3B3] hover:text-[#FFFFFF] border border-white/[0.07]"}`}>
               {f}
@@ -831,7 +920,7 @@ function LibraryPage({ onArticleClick, search, onSearchChange }: { onArticleClic
 
       {/* Sector filter */}
       <div className="flex gap-1 mb-5 flex-wrap">
-        {[{ label: "All", value: "All" }, ...playlists.map(p => ({ label: p.title, value: p.category }))].map(s => (
+        {[{ label: "All", value: "All" }, ...articleBackedPlaylists.map(p => ({ label: p.title, value: p.category }))].map(s => (
           <button key={s.value} onClick={() => setCategory(s.value)}
             className={`px-2 py-0.5 rounded text-[10px] transition-colors ${category === s.value ? "text-[#000000] bg-[#1ED760]" : "text-[#B3B3B3] bg-[#282828] border border-white/[0.07] hover:text-[#FFFFFF]"}`}>
             {s.label}
@@ -842,7 +931,7 @@ function LibraryPage({ onArticleClick, search, onSearchChange }: { onArticleClic
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-muted-foreground text-[13px]">No results found.</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
           {filtered.map(a => <ArticleCard key={a.slug} article={a} onClick={() => onArticleClick(a)} />)}
         </div>
       )}
@@ -856,29 +945,46 @@ function AboutPage() {
   return (
     <div className="max-w-xl mx-auto px-4 py-6">
       <div className="flex items-start gap-5 mb-8 pb-6 border-b border-white/[0.07]">
-        <div className="w-16 h-16 rounded-full bg-[#282828] border border-white/[0.07] flex items-center justify-center flex-shrink-0">
-          <span className="text-xl font-semibold text-[#1ED760]">YK</span>
-        </div>
+        <ProfileAvatar className="h-16 w-16 flex-shrink-0" />
         <div>
           <h1 className="text-xl  font-semibold text-foreground">Yash Khandelwal</h1>
           <p className="text-[13px] text-muted-foreground">Web3 / DeFi Investment Research Analyst</p>
           <div className="flex gap-3 mt-2">
-            <a href="#" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><Github size={11} /> GitHub</a>
-            <a href="#" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><Globe size={11} /> Twitter</a>
+            <a href="https://linkedin.com/in/yash-khandelwal-76384b227" target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><Globe size={11} /> LinkedIn</a>
+            <a href="/resume/yash-khandelwal-resume.pdf" target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><FileText size={11} /> Resume</a>
           </div>
         </div>
       </div>
 
       <div className="space-y-5 text-[13px] text-muted-foreground leading-7  mb-8">
-        <p>I research DeFi protocols, stablecoin yield systems, fixed-income primitives, and on-chain market structure.</p>
-        <p>This portfolio is a public research library: memos, maps, dashboard ideas, and research agents that support source-backed analysis.</p>
-        <p>The work is intentionally evidence-first. Drafts and lab projects are labeled as unfinished until the underlying research or tooling is ready.</p>
+        <p>I am a Web3 / DeFi investment research analyst focused on protocol research, blockchain infrastructure, stablecoin systems, and quantitative strategy evaluation.</p>
+        <p>My work combines DeFi protocol due diligence, smart contract and tokenomics analysis, node and validator opportunity research, and pre-investment stress testing for quantitative strategies.</p>
+        <p>This portfolio is a public research library: source-backed memos, market maps, dashboard ideas, and research agents. Drafts and lab projects stay labeled as unfinished until the underlying research or tooling is ready.</p>
       </div>
 
       <div className="mb-8">
-        <p className="text-[11px]  text-muted-foreground uppercase tracking-wide mb-4">Focus Areas</p>
+        <p className="text-[11px]  text-muted-foreground uppercase tracking-wide mb-4">Proof Points</p>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {[
+            "Product Research Analyst at Infrasingularity",
+            "Research Analyst at Zelta Tech",
+            "900+ quantitative analyst community",
+            "Stress-testing engine for quantitative algorithms",
+            "15+ protocol opportunities evaluated per quarter",
+            "5+ years active crypto spot/derivatives trading",
+          ].map(f => (
+            <div key={f} className="flex items-center gap-2 text-[12px] text-foreground/70 p-2 rounded bg-[#181818] border border-white/[0.07]">
+              <span className="w-1 h-1 rounded-full bg-[#1ED760] flex-shrink-0" />
+              {f}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mb-8">
+        <p className="text-[11px]  text-muted-foreground uppercase tracking-wide mb-4">Skills</p>
         <div className="grid grid-cols-2 gap-2">
-          {["Stablecoin Yield Mechanics", "DeFi Fixed Income", "On-chain Market Structure", "Protocol Revenue Analysis", "Agent-Payment Infrastructure", "Consumer Crypto Finance"].map(f => (
+          {["DeFi Protocols", "Blockchain Technology", "Smart Contract Analysis", "Quantitative Research", "Risk Modeling", "Tokenomics Evaluation", "Node/Validator Operations", "Trading Strategies"].map(f => (
             <div key={f} className="flex items-center gap-2 text-[12px] text-foreground/70 p-2 rounded bg-[#181818] border border-white/[0.07]">
               <span className="w-1 h-1 rounded-full bg-[#1ED760] flex-shrink-0" />
               {f}
@@ -891,8 +997,8 @@ function AboutPage() {
         <p className="text-[11px]  text-muted-foreground uppercase tracking-wide mb-4">Experience</p>
         <div className="space-y-4">
           {[
-            { role: "DeFi Research Analyst", org: "Independent", period: "2023 — Present", desc: "Producing investment memos on DeFi protocols, stablecoin mechanics, and on-chain market structure." },
-            { role: "Crypto Research Intern", org: "Web3 Fund", period: "2022 — 2023", desc: "Coverage of L1/L2 ecosystems, protocol tokenomics, and competitive positioning." },
+            { role: "Product Research Analyst", org: "Infrasingularity", period: "Jun 2025 - Feb 2026", desc: "Built evaluation pipelines for infrastructure-running opportunities, conducted DeFi and Web3 protocol due diligence, assessed tokenomics and risk parameters, and produced research reports for node operation and validator opportunities." },
+            { role: "Research Analyst", org: "Zelta Tech", period: "Mar 2024 - Jun 2025", desc: "Designed a stress-testing engine for quantitative algorithms, scaled a 900+ quantitative analyst community, contributed to an internal algorithm creation and back-testing platform, and evaluated strategy robustness across market regimes." },
           ].map(e => (
             <div key={e.role} className="border-l border-white/[0.07] pl-4">
               <p className="text-[13px] font-medium text-foreground">{e.role}</p>
@@ -985,10 +1091,10 @@ function ContactPage() {
 
 const navItems = [
   { id: "home" as Page, label: "Home", icon: Home },
-  { id: "library" as Page, label: "Research Library", icon: BookOpen },
-  { id: "agents" as Page, label: "AI Agents Lab", icon: Cpu },
-  { id: "dashboards" as Page, label: "Dashboard Lab", icon: BarChart2 },
-  { id: "about" as Page, label: "About", icon: User },
+  { id: "library" as Page, label: "The Vault", icon: BookOpen },
+  { id: "agents" as Page, label: "Agent Builds", icon: Cpu },
+  { id: "dashboards" as Page, label: "Dashboards", icon: BarChart2 },
+  { id: "about" as Page, label: "Who’s Behind This", icon: User },
   { id: "contact" as Page, label: "Contact", icon: Mail },
 ];
 
@@ -1022,7 +1128,7 @@ function Sidebar({ current, onNavigate, collapsed }: { current: Page; onNavigate
         <div className="hidden sm:block border-t border-white/[0.05] px-3 pb-4 pt-3">
           <p className="px-3 pb-2 pt-4 text-[11px] font-bold uppercase tracking-[0.1em] text-[#B3B3B3]">Your Library</p>
           <div className="space-y-1">
-            {playlists.map(pl => {
+            {articleBackedPlaylists.map(pl => {
               const shelfArticle = articles.find(article => article.category === pl.category) ?? articles[0];
               const count = articles.filter(article => article.category === pl.category).length;
               return (
@@ -1154,50 +1260,79 @@ function NowReadingBar({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[1000] flex h-[56px] items-center gap-2 border-t border-white/[0.07] bg-[#181818] px-2 sm:h-[72px] sm:px-4 sm:gap-4">
-      {/* Article info */}
-      <div className="flex min-w-0 flex-1 items-center gap-2 sm:w-64 sm:flex-initial sm:flex-shrink-0 sm:gap-3">
-        <ResearchCoverArt article={article} compact className="h-10 w-10 flex-shrink-0 rounded border-0" />
-        <div className="min-w-0">
-          <button onClick={onOpen} aria-label={`Open ${article.title}`} className="block max-w-[190px] truncate text-left text-sm font-medium leading-tight text-[#FFFFFF] transition-colors hover:text-[#FFFFFF]">
+    <div className="fixed bottom-0 left-0 right-0 z-[1000] flex h-[88px] items-center border-t border-white/[0.07] bg-[#181818] px-3 py-2 sm:h-[72px] sm:px-4 sm:py-0">
+      <div className="flex w-full flex-col gap-2 sm:hidden">
+        <div className="flex min-w-0 items-center gap-2">
+          <ResearchCoverArt article={article} compact className="h-9 w-9 flex-shrink-0 rounded border-0" />
+          <button onClick={onOpen} aria-label={`Open ${article.title}`} className="min-w-0 flex-1 truncate text-left text-[13px] font-medium leading-tight text-[#FFFFFF]">
             {article.title.split(":")[0]}
           </button>
-          <p className="hidden max-w-[190px] truncate text-[12px] text-[#B3B3B3] sm:block">{article.category}</p>
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="flex min-w-0 flex-shrink-0 flex-col items-center gap-2 sm:mx-auto sm:max-w-md sm:flex-1">
-        <div className="flex items-center gap-6">
-          <button onClick={onPrevious} aria-label="Previous article" className="hidden text-[#B3B3B3] transition-colors hover:text-[#FFFFFF] sm:inline-flex"><SkipBack size={20} /></button>
-          <button onClick={() => setPlaying(p => !p)} aria-label={playing ? "Pause reading session" : "Play reading session"} className="flex h-8 w-8 items-center justify-center rounded-full text-[#FFFFFF] transition-transform hover:scale-105">
-            {playing ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
-          </button>
-          <button onClick={onNext} aria-label="Next article" className="hidden text-[#B3B3B3] transition-colors hover:text-[#FFFFFF] sm:inline-flex"><SkipForward size={20} /></button>
-        </div>
-        <div className="hidden w-full items-center gap-2 sm:flex">
-          <span className="w-10 text-right text-[12px] text-[#B3B3B3]">{time.elapsed}</span>
-          <div
-            className="group h-1 flex-1 cursor-pointer overflow-hidden rounded-full bg-[#535353]"
-            role="slider"
-            aria-label="Reading progress"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={Math.round(progress)}
-            onClick={handleProgressClick}
-          >
-            <div className="h-full rounded-full bg-[#FFFFFF] transition-all duration-200 group-hover:bg-[#1ED760]" style={{ width: `${progress}%` }} />
+          <div className="flex flex-shrink-0 items-center gap-3">
+            <button onClick={onPrevious} aria-label="Previous article" className="inline-flex text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]"><SkipBack size={18} /></button>
+            <button onClick={() => setPlaying(p => !p)} aria-label={playing ? "Pause reading session" : "Play reading session"} className="flex h-8 w-8 items-center justify-center rounded-full text-[#FFFFFF] transition-transform hover:scale-105">
+              {playing ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+            </button>
+            <button onClick={onNext} aria-label="Next article" className="inline-flex text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]"><SkipForward size={18} /></button>
           </div>
-          <span className="w-10 text-[12px] text-[#B3B3B3]">{time.total}</span>
+        </div>
+        <div
+          className="group h-1.5 w-full cursor-pointer overflow-hidden rounded-full bg-[#535353]"
+          role="slider"
+          aria-label="Reading progress"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress)}
+          onClick={handleProgressClick}
+        >
+          <div className="h-full rounded-full bg-[#FFFFFF] transition-all duration-200 group-hover:bg-[#1ED760]" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
-      {/* Right */}
-      <div className="hidden w-52 flex-shrink-0 items-center justify-end gap-3 md:flex">
-        <button aria-label="Bookmark current research" className="text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]">
-          <Bookmark size={20} />
-        </button>
-        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#535353]">Now Reading</p>
+      <div className="hidden w-full items-center gap-4 sm:flex">
+        {/* Article info */}
+        <div className="flex min-w-0 flex-1 items-center gap-3 sm:min-w-[200px] sm:max-w-[280px] sm:flex-[1_1_0]">
+          <ResearchCoverArt article={article} compact className="h-10 w-10 flex-shrink-0 rounded border-0" />
+          <div className="min-w-0 flex-1">
+            <button onClick={onOpen} aria-label={`Open ${article.title}`} className="block max-w-[180px] truncate text-left text-sm font-medium leading-tight text-[#FFFFFF] transition-colors hover:text-[#FFFFFF]">
+              {article.title.split(":")[0]}
+            </button>
+            <p className="hidden max-w-[180px] truncate text-[12px] text-[#B3B3B3] sm:block">{article.category}</p>
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div className="flex min-w-0 flex-shrink-0 flex-col items-center gap-2 sm:mx-auto sm:max-w-md sm:flex-1">
+          <div className="flex items-center gap-6">
+            <button onClick={onPrevious} aria-label="Previous article" className="text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]"><SkipBack size={20} /></button>
+            <button onClick={() => setPlaying(p => !p)} aria-label={playing ? "Pause reading session" : "Play reading session"} className="flex h-8 w-8 items-center justify-center rounded-full text-[#FFFFFF] transition-transform hover:scale-105">
+              {playing ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-0.5" />}
+            </button>
+            <button onClick={onNext} aria-label="Next article" className="text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]"><SkipForward size={20} /></button>
+          </div>
+          <div className="flex w-full items-center gap-2">
+            <span className="w-10 text-right text-[12px] text-[#B3B3B3]">{time.elapsed}</span>
+            <div
+              className="group h-1 flex-1 cursor-pointer overflow-hidden rounded-full bg-[#535353]"
+              role="slider"
+              aria-label="Reading progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(progress)}
+              onClick={handleProgressClick}
+            >
+              <div className="h-full rounded-full bg-[#FFFFFF] transition-all duration-200 group-hover:bg-[#1ED760]" style={{ width: `${progress}%` }} />
+            </div>
+            <span className="w-10 text-[12px] text-[#B3B3B3]">{time.total}</span>
+          </div>
+        </div>
+
+        {/* Right */}
+        <div className="hidden w-52 flex-shrink-0 items-center justify-end gap-3 md:flex">
+          <button aria-label="Bookmark current research" className="text-[#B3B3B3] transition-colors hover:text-[#FFFFFF]">
+            <Bookmark size={20} />
+          </button>
+          <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#535353]">Now Reading</p>
+        </div>
       </div>
     </div>
   );
@@ -1261,14 +1396,12 @@ export default function App() {
               <button onClick={() => setRightPanelOpen(o => !o)} aria-label={rightPanelOpen ? "Hide research queue" : "Show research queue"} className={`hidden md:block p-1.5 rounded transition-colors ${rightPanelOpen ? "text-[#1ED760] bg-[#282828]" : "text-[#B3B3B3] hover:text-[#FFFFFF] hover:bg-[#282828]"}`}>
                 <PanelRight size={14} />
               </button>
-              <div className="w-6 h-6 rounded-full bg-[#282828] border border-white/[0.07] flex items-center justify-center ml-1">
-                <span className="text-[9px] font-medium text-[#1ED760]">YK</span>
-              </div>
+              <ProfileAvatar compact className="ml-1 h-6 w-6 flex-shrink-0" />
             </div>
           </header>
 
           {/* Scrollable main content */}
-          <main ref={mainRef} className="flex-1 overflow-y-auto pb-20 sm:pb-24">
+          <main ref={mainRef} className="flex-1 overflow-y-auto pb-32 sm:pb-24">
             {page === "home" && <HomePage onArticleClick={handleArticleClick} onNavigate={handleNavigate} />}
             {page === "library" && <LibraryPage onArticleClick={handleArticleClick} search={globalSearch} onSearchChange={setGlobalSearch} />}
             {page === "article" && <ArticlePage article={activeArticle} onBack={() => handleNavigate("library")} onArticleClick={handleArticleClick} />}
@@ -1290,12 +1423,16 @@ export default function App() {
                   <p className="text-[13px] text-muted-foreground">Planned and building research views for the questions behind the memos.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {dashboards.map(d => (
-                    <DashboardCard key={d.slug} dash={d} onArticleClick={() => {
-                      const a = articles.find(ar => ar.slug === d.relatedArticleSlug);
-                      if (a) handleArticleClick(a);
-                    }} />
-                  ))}
+                  {dashboards.map(d => {
+                    const relatedArticle = d.relatedArticleSlug ? articles.find(ar => ar.slug === d.relatedArticleSlug) : undefined;
+                    return (
+                      <DashboardCard
+                        key={d.slug}
+                        dash={d}
+                        onArticleClick={relatedArticle ? () => handleArticleClick(relatedArticle) : undefined}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             )}
