@@ -93,6 +93,11 @@ const customCoverImagesBySlug: Record<string, string> = {
 };
 
 const PROFILE_IMAGE_SRC = "/profile/yash-profile.jpg";
+const RESUME_URL = "/resume/yash-khandelwal-resume.pdf";
+const X_URL = "https://x.com/click2yash";
+const GITHUB_URL = "https://github.com/Yashkhandelwal1234";
+const EMAIL_URL = "mailto:click2yash@gmail.com";
+const LINKEDIN_URL = "https://linkedin.com/in/yash-khandelwal-76384b227";
 
 function getCoverStyle(article: Article) {
   return coverStylesByCategory[article.category] ?? coverStylesBySlug[article.slug] ?? {
@@ -778,7 +783,7 @@ function HomePage({ onArticleClick, onNavigate }: { onArticleClick: (a: Article)
               <button onClick={() => onNavigate("library")} className="rounded-full bg-[#1ED760] px-8 py-3 text-sm font-bold text-[#000000] transition duration-150 hover:scale-[1.03] hover:bg-[#1DB954] active:scale-[0.98]">
                 ▶ Browse Research
               </button>
-              <a href="/resume/yash-khandelwal-resume.pdf" target="_blank" rel="noreferrer" className="rounded-full border-[1.5px] border-[rgba(255,255,255,0.5)] bg-transparent px-7 py-[11px] text-sm font-bold text-[#FFFFFF] transition-[border-color] duration-150 hover:border-[#FFFFFF]">
+              <a href={RESUME_URL} target="_blank" rel="noreferrer" className="rounded-full border-[1.5px] border-[rgba(255,255,255,0.5)] bg-transparent px-7 py-[11px] text-sm font-bold text-[#FFFFFF] transition-[border-color] duration-150 hover:border-[#FFFFFF]">
                 Resume
               </a>
             </div>
@@ -949,9 +954,12 @@ function AboutPage() {
         <div>
           <h1 className="text-xl  font-semibold text-foreground">Yash Khandelwal</h1>
           <p className="text-[13px] text-muted-foreground">Web3 / DeFi Investment Research Analyst</p>
-          <div className="flex gap-3 mt-2">
-            <a href="https://linkedin.com/in/yash-khandelwal-76384b227" target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><Globe size={11} /> LinkedIn</a>
-            <a href="/resume/yash-khandelwal-resume.pdf" target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><FileText size={11} /> Resume</a>
+          <div className="flex flex-wrap gap-3 mt-2">
+            <a href={X_URL} target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><Globe size={11} /> X</a>
+            <a href={GITHUB_URL} target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><Github size={11} /> GitHub</a>
+            <a href={EMAIL_URL} className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><Mail size={11} /> Email</a>
+            <a href={LINKEDIN_URL} target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><Globe size={11} /> LinkedIn</a>
+            <a href={RESUME_URL} target="_blank" rel="noreferrer" className="text-[11px] text-muted-foreground hover:text-[#1ED760] transition-colors flex items-center gap-1"><FileText size={11} /> Resume</a>
           </div>
         </div>
       </div>
@@ -1071,15 +1079,18 @@ function ContactPage() {
       <div className="mt-8 pt-6 border-t border-white/[0.07]">
         <p className="text-[11px]  text-muted-foreground uppercase tracking-wide mb-3">Other Ways</p>
         <div className="space-y-2">
-          {[["Twitter / X", "@yashkhandelwal", Globe], ["GitHub", "github.com/yashkhandelwal", Github], ["Email", "yash@research.xyz", Mail]].map(([label, val, Icon]) => (
-            <div key={label as string} className="flex items-center gap-3 text-[12px] text-muted-foreground">
+          {[
+            { label: "X / Twitter", value: "@click2yash", href: X_URL, icon: Globe, external: true },
+            { label: "GitHub", value: "Yashkhandelwal1234", href: GITHUB_URL, icon: Github, external: true },
+            { label: "Email", value: "click2yash@gmail.com", href: EMAIL_URL, icon: Mail, external: false },
+          ].map(({ label, value, href, icon: Icon, external }) => (
+            <a key={label} href={href} target={external ? "_blank" : undefined} rel={external ? "noreferrer" : undefined} className="flex items-center gap-3 text-[12px] text-muted-foreground transition-colors hover:text-[#FFFFFF]">
               <span className="w-6 h-6 rounded bg-[#282828] border border-white/[0.07] flex items-center justify-center">
-                {/* @ts-ignore */}
                 <Icon size={11} />
               </span>
-              <span className="flex-1">{label as string}</span>
-              <span className="">{val as string}</span>
-            </div>
+              <span className="flex-1">{label}</span>
+              <span className="">{value}</span>
+            </a>
           ))}
         </div>
       </div>
@@ -1106,7 +1117,7 @@ function Sidebar({ current, onNavigate, collapsed }: { current: Page; onNavigate
         <div className="w-7 h-7 rounded-md bg-[#1ED760] flex items-center justify-center flex-shrink-0">
           <BookOpen size={14} className="text-[#000000]" />
         </div>
-        {!collapsed && <span className="hidden sm:inline text-[13px] font-medium text-[#FFFFFF] tracking-tight">research.xyz</span>}
+        {!collapsed && <span className="hidden sm:inline text-[13px] font-medium text-[#FFFFFF] tracking-tight">Yash's Wall</span>}
       </div>
 
       {/* Nav */}
