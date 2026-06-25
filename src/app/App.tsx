@@ -495,32 +495,32 @@ function ArticleCard({ article, onClick }: { article: Article; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="card group relative w-full cursor-pointer rounded-lg bg-[#181818] p-3 text-left transition-colors duration-200 hover:bg-[#282828]"
+      className="card group relative w-full cursor-pointer rounded-lg bg-[#181818] p-2.5 text-left transition-colors duration-200 hover:bg-[#282828] sm:p-3"
     >
-      <div className="relative mb-3 aspect-square w-full overflow-hidden rounded">
+      <div className="relative mx-auto mb-2 aspect-square w-full overflow-hidden rounded lg:max-w-[150px] xl:max-w-[156px] 2xl:max-w-[148px]">
         <ResearchCoverArt article={article} compact className="h-full w-full rounded border-0" />
         <span className="card-play-btn" aria-hidden="true">
           <Play size={20} fill="currentColor" className="ml-0.5" />
         </span>
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-1">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug text-[#FFFFFF]">
+          <h3 className="line-clamp-2 min-w-0 text-[14px] font-semibold leading-snug text-[#FFFFFF]">
             {article.title}
           </h3>
           <StatusBadge status={article.status} />
         </div>
-        <p className="line-clamp-2 text-sm leading-6 text-[#B3B3B3]">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[10px] leading-4 text-[#B3B3B3]">
+          <span>{article.category}</span>
+          <span className="text-[#535353]">·</span>
+          <span>{formatDate(article.date)}</span>
+          <span className="flex items-center gap-1"><Clock size={10} />{article.readTime}m</span>
+        </div>
+        <p className="line-clamp-1 text-[12px] leading-5 text-[#B3B3B3]">
           {article.thesis}
         </p>
         <div className="flex flex-wrap gap-1">
           {article.tags.slice(0, 2).map(t => <MetaTag key={t} label={t} />)}
-        </div>
-        <div className="flex items-center gap-2 text-[12px] text-[#B3B3B3]">
-          <span>{article.category}</span>
-          <span className="text-[#535353]">·</span>
-          <span>{formatDate(article.date)}</span>
-          <span className="ml-auto flex items-center gap-1"><Clock size={11} />{article.readTime}m</span>
         </div>
       </div>
     </button>
