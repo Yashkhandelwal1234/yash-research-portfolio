@@ -5,6 +5,7 @@ export type ArticleFigureVisual = "reserve-flow" | "rate-spread" | "agent-networ
 export type ChecklistLevel = "green" | "amber" | "red";
 export type CalloutTone = "accent" | "info" | "warning";
 export type DashboardTool = "Dune" | "Observable" | "Streamlit" | "Python" | "Custom";
+export type DashboardDataMode = "static-manual";
 export type ResearchPlaylistIcon = "trending" | "bar-chart" | "globe" | "zap" | "database" | "bookmark";
 
 export interface CoverArtMetadata {
@@ -64,7 +65,69 @@ export interface Dashboard {
   embedUrl?: string;
   externalUrl?: string;
   relatedArticleSlug?: string;
+  specSlug?: string;
   preview?: CoverArtMetadata;
+}
+
+export interface DashboardMetric {
+  label: string;
+  value: string;
+  context: string;
+}
+
+export interface DashboardRateRow {
+  label: string;
+  value: string;
+  yieldType: string;
+  note: string;
+  includesIncentives?: boolean;
+}
+
+export interface DashboardAllocationRow {
+  venue: string;
+  share: string;
+  approximateCapital: string;
+  note?: string;
+}
+
+export interface DashboardTrendPoint {
+  period: string;
+  earningsUsd: number;
+  label: string;
+}
+
+export interface DashboardRiskItem {
+  label: string;
+  detail: string;
+  level: ChecklistLevel;
+}
+
+export interface DashboardSourceLink {
+  label: string;
+  url: string;
+  note: string;
+}
+
+export interface DashboardSpec {
+  slug: string;
+  title: string;
+  subtitle: string;
+  status: BuildStatus;
+  dataMode: DashboardDataMode;
+  snapshotDate: string;
+  lastUpdated: string;
+  sourceNote: string;
+  researchQuestion: string;
+  relatedArticleSlug?: string;
+  headlineMetrics: DashboardMetric[];
+  baseYield: DashboardMetric;
+  pendleRates: DashboardRateRow[];
+  smartAllocatorAllocation: DashboardAllocationRow[];
+  quarterlyEarningsTrend: DashboardTrendPoint[];
+  incentiveOrganicNote: string;
+  riskChecklist: DashboardRiskItem[];
+  sourceLinks: DashboardSourceLink[];
+  futureDataSources: string[];
 }
 
 export interface ResearchPlaylist {

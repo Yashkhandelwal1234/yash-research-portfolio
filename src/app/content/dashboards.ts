@@ -3,11 +3,13 @@ import type { Dashboard } from "../types/content";
 export const dashboards: Dashboard[] = [
   {
     slug: "stablecoin-yield-monitor",
-    title: "Stablecoin Yield Monitor",
+    title: "sUSDD Pendle Monitor",
     status: "Building",
-    researchQuestion: "Which stablecoin yield questions should be tracked in a repeatable dashboard?",
-    dataSources: ["Source list to be added"],
-    tool: "Dune",
+    researchQuestion: "Which parts of the sUSDD/Pendle setup need monitoring before the dashboard becomes automated?",
+    dataSources: ["Static/manual snapshot — not live data.", "USDD memo", "Pendle manual review", "DeFiLlama manual review"],
+    tool: "Custom",
+    relatedArticleSlug: "usdd-pendle-investment-memo",
+    specSlug: "stablecoin-yield-susdd-pendle-monitor",
     preview: { variant: "flows", colors: ["#0f3b25", "#32d583", "#7dd3fc"], label: "SY" },
   },
   {

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type MouseEvent } from "react";
+import { useState, useRef, useEffect, lazy, Suspense, type MouseEvent } from "react";
 import {
   Home,
   BookOpen,
@@ -36,6 +36,7 @@ import {
 import { articles, articleCoverPresets } from "./content/articles";
 import { agents } from "./content/agents";
 import { dashboards } from "./content/dashboards";
+import { getDashboardSpec } from "./content/dashboardSpecs";
 import { openQuestions, playlists, savedSources } from "./content/library";
 import type {
   Agent,
@@ -53,6 +54,8 @@ import type {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Page = "home" | "library" | "article" | "agents" | "dashboards" | "about" | "contact";
+
+const DashboardDetail = lazy(() => import("./components/dashboard/DashboardDetail"));
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -643,11 +646,21 @@ function AgentCard({ agent }: { agent: Agent }) {
 
 // ─── Dashboard Card ───────────────────────────────────────────────────────────
 
-function DashboardCard({ dash, onArticleClick }: { dash: Dashboard; onArticleClick?: () => void }) {
+function DashboardCard({
+  dash,
+  onArticleClick,
+  onSelect,
+  active = false,
+}: {
+  dash: Dashboard;
+  onArticleClick?: () => void;
+  onSelect?: () => void;
+  active?: boolean;
+}) {
   const color = "#1ED760";
 
   return (
-    <div className="rounded-lg bg-[#181818] overflow-hidden transition-colors hover:bg-[#282828] group">
+    <div className={`rounded-lg bg-[#181818] overflow-hidden transition-colors hover:bg-[#282828] group ${active ? "ring-1 ring-[#1ED760]/70" : ""}`}>
       <div className="h-24 flex items-center justify-center relative overflow-hidden"
         style={{ backgroundColor: "#282828", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
         <div className="absolute inset-0 opacity-20" style={{ background: `radial-gradient(circle at 30% 50%, ${color}40, transparent 70%)` }} />
@@ -664,12 +677,17 @@ function DashboardCard({ dash, onArticleClick }: { dash: Dashboard; onArticleCli
           <span className="truncate">{dash.dataSources[0]}</span>
         </div>
         <div className="flex gap-2">
-          {dash.status === "Live" && (
+          {onSelect && (
+            <button onClick={onSelect} className="flex-1 py-1.5 text-[11px] font-medium rounded text-[#000000] bg-[#1ED760] hover:bg-[#1DB954] transition-colors flex items-center justify-center gap-1">
+              {active ? "Viewing Spec" : "View Static Spec"}
+            </button>
+          )}
+          {!onSelect && dash.status === "Live" && (
             <button className="flex-1 py-1.5 text-[11px] font-medium rounded text-[#000000] bg-[#1ED760] hover:bg-[#1DB954] transition-colors flex items-center justify-center gap-1">
               <ExternalLink size={10} /> Open Dashboard
             </button>
           )}
-          {dash.status !== "Live" && (
+          {!onSelect && dash.status !== "Live" && (
             <button disabled className="flex-1 py-1.5 text-[11px] font-medium rounded text-muted-foreground bg-muted/30 border border-white/5 cursor-not-allowed flex items-center justify-center gap-1">
               In Progress
             </button>
@@ -1352,13 +1370,19 @@ function NowReadingBar({
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const firstDashboardWithSpec = dashboards.find(d => d.specSlug) ?? dashboards[0];
   const [page, setPage] = useState<Page>("home");
   const [activeArticle, setActiveArticle] = useState<Article>(articles[0]);
+  const [activeDashboardSlug, setActiveDashboardSlug] = useState<string | undefined>(firstDashboardWithSpec?.slug);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
   const [globalSearch, setGlobalSearch] = useState("");
 
   const mainRef = useRef<HTMLDivElement>(null);
+  const activeDashboard = dashboards.find(d => d.slug === activeDashboardSlug) ?? firstDashboardWithSpec;
+  const activeDashboardSpec = getDashboardSpec(activeDashboard?.specSlug);
+  const activeDashboardArticleSlug = activeDashboardSpec?.relatedArticleSlug ?? activeDashboard?.relatedArticleSlug;
+  const activeDashboardArticle = activeDashboardArticleSlug ? articles.find(article => article.slug === activeDashboardArticleSlug) : undefined;
 
   const handleArticleClick = (a: Article) => {
     setActiveArticle(a);
@@ -1440,11 +1464,21 @@ export default function App() {
                       <DashboardCard
                         key={d.slug}
                         dash={d}
+                        active={activeDashboard?.slug === d.slug}
+                        onSelect={d.specSlug ? () => setActiveDashboardSlug(d.slug) : undefined}
                         onArticleClick={relatedArticle ? () => handleArticleClick(relatedArticle) : undefined}
                       />
                     );
                   })}
                 </div>
+                {activeDashboardSpec && (
+                  <Suspense fallback={<div className="mt-5 rounded-lg border border-white/[0.07] bg-[#181818] p-4 text-[12px] text-muted-foreground">Loading dashboard...</div>}>
+                    <DashboardDetail
+                      spec={activeDashboardSpec}
+                      onArticleClick={activeDashboardArticle ? () => handleArticleClick(activeDashboardArticle) : undefined}
+                    />
+                  </Suspense>
+                )}
               </div>
             )}
             {page === "about" && <AboutPage />}
