@@ -70,11 +70,13 @@ Use `trend-chart` only for static chart data and only with the existing Recharts
 Use cached DefiLlama blocks only when the task explicitly includes the Phase 2 DefiLlama layer.
 
 - Refresh the cache manually with `npm run data:defillama`.
+- Run `npm run data:check` after every refresh. It is offline and read-only; it validates the cached snapshot before it is committed.
 - Do not fetch DefiLlama from React components, browser effects, Vercel build hooks, or GitHub Actions.
 - Use the adapter in `src/app/data/defillama/` to convert cached values into dashboard blocks.
 - Label cached blocks with `dataBadge: "cached-defillama"`.
 - Keep manual Pendle PT/YT/LP rates unless the exact sUSDD Pendle pool id is verified in a future task.
-- If an endpoint fails, do not hand-edit substitute values; keep the previous committed cache and report the failure.
+- If a refresh or check fails, do not hand-edit substitute values or commit the cache; keep the previous committed cache and report the full Terminal error.
+- A cache older than 14 days produces a warning, not a failure. Refresh it when practical and keep the dashboard labeled as cached or mixed, never live.
 
 ## Implementation Checklist
 
@@ -86,5 +88,6 @@ Use cached DefiLlama blocks only when the task explicitly includes the Phase 2 D
 6. Keep dashboard UI consistent with the Spotify-style theme: dark cards, green accent, dense layout, rounded buttons.
 7. Do not touch unrelated pages or article content unless strictly required.
 8. Run `npm run data:defillama` when DefiLlama cache code or cached values changed.
-9. Run `npm run build`.
-10. Run `git status --short --branch`.
+9. Run `npm run data:check` before committing a cache update.
+10. Run `npm run build`.
+11. Run `git status --short --branch`.

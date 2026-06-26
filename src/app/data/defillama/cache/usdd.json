@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "provider": "DefiLlama",
-  "fetchedAt": "2026-06-26T06:07:18.841Z",
+  "fetchedAt": "2026-06-26T09:46:44.408Z",
   "sources": [
     {
       "id": "protocol-usdd",
@@ -9,7 +9,7 @@
       "url": "https://api.llama.fi/protocol/usdd",
       "ok": true,
       "status": 200,
-      "fetchedAt": "2026-06-26T06:07:18.841Z"
+      "fetchedAt": "2026-06-26T09:46:44.409Z"
     },
     {
       "id": "tvl-usdd",
@@ -17,7 +17,7 @@
       "url": "https://api.llama.fi/tvl/usdd",
       "ok": true,
       "status": 200,
-      "fetchedAt": "2026-06-26T06:07:21.440Z"
+      "fetchedAt": "2026-06-26T09:46:45.146Z"
     },
     {
       "id": "fees-revenue-usdd",
@@ -25,7 +25,7 @@
       "url": "https://api.llama.fi/summary/fees/usdd?dataType=dailyRevenue",
       "ok": true,
       "status": 200,
-      "fetchedAt": "2026-06-26T06:07:21.738Z"
+      "fetchedAt": "2026-06-26T09:46:45.508Z"
     },
     {
       "id": "stablecoin-list",
@@ -33,7 +33,7 @@
       "url": "https://stablecoins.llama.fi/stablecoins?includePrices=true",
       "ok": true,
       "status": 200,
-      "fetchedAt": "2026-06-26T06:07:23.258Z",
+      "fetchedAt": "2026-06-26T09:46:46.189Z",
       "note": "Current docs list api.llama.fi for stablecoin paths, but the working free stablecoin host is stablecoins.llama.fi."
     },
     {
@@ -42,7 +42,7 @@
       "url": "https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=14",
       "ok": true,
       "status": 200,
-      "fetchedAt": "2026-06-26T06:07:23.941Z",
+      "fetchedAt": "2026-06-26T09:46:46.849Z",
       "note": "Asset id is resolved from the stablecoin list by USDD symbol/name before this endpoint is called."
     }
   ],
@@ -58,23 +58,23 @@
     "name": "USDD",
     "category": "CDP",
     "chains": [
-      "Binance",
+      "Tron",
       "Ethereum",
-      "Tron"
+      "Binance"
     ],
-    "currentTvlUsd": 1316713269.5682926,
+    "currentTvlUsd": 1321759561.1335592,
     "currentChainTvlsUsd": [
       {
         "chain": "Tron",
-        "tvlUsd": 1219700494.46515
+        "tvlUsd": 1223851704.93446
       },
       {
         "chain": "Ethereum",
-        "tvlUsd": 81987270.37791
+        "tvlUsd": 82838299.40663
       },
       {
         "chain": "Binance",
-        "tvlUsd": 15025504.72523
+        "tvlUsd": 15069556.79247
       }
     ],
     "tvlHistory": [
@@ -145,8 +145,8 @@
       },
       {
         "date": "2026-06-26",
-        "timestamp": 1782447251,
-        "tvlUsd": 1316713269
+        "timestamp": 1782461543,
+        "tvlUsd": 1321759561
       }
     ]
   },
@@ -154,8 +154,8 @@
     "assetId": "14",
     "name": "USDD",
     "symbol": "USDD",
-    "price": 0.9984054565180236,
-    "circulatingUsd": 1381596951.7191243,
+    "price": 0.9982707075861561,
+    "circulatingUsd": 1381320678.3061736,
     "chains": [
       "Tron",
       "Ethereum",
@@ -231,17 +231,17 @@
       {
         "date": "2026-06-26",
         "timestamp": 1782432000,
-        "circulatingUsd": 1379920288.11
+        "circulatingUsd": 1379734048.36
       }
     ]
   },
   "feesRevenue": {
     "slug": "usdd",
     "name": "USDD",
-    "total24hUsd": 15147,
+    "total24hUsd": 15150,
     "total7dUsd": 106010,
     "total30dUsd": 463318,
-    "totalAllTimeUsd": 3774538,
+    "totalAllTimeUsd": 3774541,
     "revenueHistory": [
       {
         "date": "2026-06-13",
@@ -311,7 +311,7 @@
       {
         "date": "2026-06-26",
         "timestamp": 1782432000,
-        "revenueUsd": 15147
+        "revenueUsd": 15150
       }
     ]
   }

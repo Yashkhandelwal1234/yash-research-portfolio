@@ -8,3 +8,4 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 source/
+src/app/data/defillama/cache/.usdd.json.*.tmp

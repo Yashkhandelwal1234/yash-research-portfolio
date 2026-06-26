@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DEFILLAMA_SOURCES } from "./sources.mjs";
@@ -219,9 +219,16 @@ async function buildCache() {
 async function main() {
   const cache = await buildCache();
   const serialized = `${JSON.stringify(cache, null, 2)}\n`;
+  const temporaryCachePath = path.join(path.dirname(cachePath), `.${path.basename(cachePath)}.${process.pid}.tmp`);
 
   await mkdir(path.dirname(cachePath), { recursive: true });
-  await writeFile(cachePath, serialized, "utf8");
+
+  try {
+    await writeFile(temporaryCachePath, serialized, "utf8");
+    await rename(temporaryCachePath, cachePath);
+  } finally {
+    await rm(temporaryCachePath, { force: true });
+  }
 
   console.log(`Wrote DefiLlama cache: ${path.relative(repoRoot, cachePath)}`);
   console.log(`Fetched at: ${cache.fetchedAt}`);

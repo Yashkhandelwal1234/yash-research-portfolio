@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "data:check": "node scripts/defillama/check-defillama-cache.mjs",
     "data:defillama": "node scripts/defillama/update-defillama-cache.mjs",
     "dev": "vite"
   },
