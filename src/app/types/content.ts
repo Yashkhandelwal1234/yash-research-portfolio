@@ -6,6 +6,7 @@ export type ChecklistLevel = "green" | "amber" | "red";
 export type CalloutTone = "accent" | "info" | "warning";
 export type DashboardTool = "Dune" | "Observable" | "Streamlit" | "Python" | "Custom";
 export type DashboardDataMode = "static-manual";
+export type DashboardBlockTone = "accent" | "info" | "warning";
 export type ResearchPlaylistIcon = "trending" | "bar-chart" | "globe" | "zap" | "database" | "bookmark";
 
 export interface CoverArtMetadata {
@@ -108,6 +109,16 @@ export interface DashboardSourceLink {
   note: string;
 }
 
+export type DashboardContentBlock =
+  | { type: "metric-grid"; title: string; metrics: DashboardMetric[]; showStaticBadge?: boolean }
+  | { type: "rate-table"; title: string; rows: DashboardRateRow[]; showStaticBadge?: boolean }
+  | { type: "allocation-table"; title: string; rows: DashboardAllocationRow[]; showStaticBadge?: boolean }
+  | { type: "trend-chart"; title: string; points: DashboardTrendPoint[]; showStaticBadge?: boolean }
+  | { type: "note"; title: string; text: string; tone?: DashboardBlockTone }
+  | { type: "risk-checklist"; title: string; items: DashboardRiskItem[]; showStaticBadge?: boolean }
+  | { type: "source-list"; title: string; sources: DashboardSourceLink[] }
+  | { type: "future-data-sources"; title: string; items: string[] };
+
 export interface DashboardSpec {
   slug: string;
   title: string;
@@ -119,15 +130,7 @@ export interface DashboardSpec {
   sourceNote: string;
   researchQuestion: string;
   relatedArticleSlug?: string;
-  headlineMetrics: DashboardMetric[];
-  baseYield: DashboardMetric;
-  pendleRates: DashboardRateRow[];
-  smartAllocatorAllocation: DashboardAllocationRow[];
-  quarterlyEarningsTrend: DashboardTrendPoint[];
-  incentiveOrganicNote: string;
-  riskChecklist: DashboardRiskItem[];
-  sourceLinks: DashboardSourceLink[];
-  futureDataSources: string[];
+  blocks: DashboardContentBlock[];
 }
 
 export interface ResearchPlaylist {

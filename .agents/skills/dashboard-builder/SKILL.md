@@ -37,17 +37,38 @@ If a dashboard is related to an article, inspect that article content before cop
 - Every visible dashboard detail must say: "Static/manual snapshot — not live data."
 - Copy only data already present in the repo or explicitly provided by Yash.
 - Do not invent live data.
-- Do not claim live refresh, automation, API ingestion, or database storage exists.
+- Do not claim live refresh, automation, API ingestion, connector ingestion, or database storage exists unless the connector exists and has been tested in this repo.
 - Use source links as manual review links unless a future task explicitly adds a real integration.
+- Preserve source links, source labels, dates, snapshot metadata, and uncertainty.
 - Separate facts, interpretation, and open risks.
+
+## Block Pattern
+
+Dashboard specs use `blocks` in `src/app/content/dashboardSpecs.ts`.
+
+Choose blocks based on the dashboard question. Do not force every dashboard into the sUSDD/Pendle sample structure.
+
+Available block types:
+
+- `metric-grid`
+- `rate-table`
+- `allocation-table`
+- `trend-chart`
+- `note`
+- `risk-checklist`
+- `source-list`
+- `future-data-sources`
+
+Use `trend-chart` only for static chart data and only with the existing Recharts dependency. Use `future-data-sources` only for planned sources that are clearly labeled as not connected.
 
 ## Implementation Checklist
 
 1. Update shared dashboard types first.
 2. Add or edit a dashboard spec in `src/app/content/dashboardSpecs.ts`.
-3. Link the card in `src/app/content/dashboards.ts` with `specSlug`.
-4. Update `src/app/content/agents.ts` only when the Dashboard Builder Agent metadata changes.
-5. Keep dashboard UI consistent with the Spotify-style theme: dark cards, green accent, dense layout, rounded buttons.
-6. Do not touch unrelated pages or article content unless strictly required.
-7. Run `npm run build`.
-8. Run `git status --short --branch`.
+3. Build the spec from reusable dashboard blocks.
+4. Link the card in `src/app/content/dashboards.ts` with `specSlug`.
+5. Update `src/app/content/agents.ts` only when the Dashboard Builder Agent metadata changes.
+6. Keep dashboard UI consistent with the Spotify-style theme: dark cards, green accent, dense layout, rounded buttons.
+7. Do not touch unrelated pages or article content unless strictly required.
+8. Run `npm run build`.
+9. Run `git status --short --branch`.
