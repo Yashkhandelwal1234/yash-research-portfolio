@@ -6,7 +6,7 @@ export const dashboards: Dashboard[] = [
     title: "sUSDD Pendle Monitor",
     status: "Building",
     researchQuestion: "Which parts of the sUSDD/Pendle setup need monitoring before the dashboard becomes automated?",
-    dataSources: ["Static/manual snapshot — not live data.", "USDD memo", "Pendle manual review", "DeFiLlama manual review"],
+    dataSources: ["Mixed manual + cached snapshot — not live data.", "USDD memo", "Pendle manual review", "DefiLlama cached snapshot"],
     tool: "Custom",
     relatedArticleSlug: "usdd-pendle-investment-memo",
     specSlug: "stablecoin-yield-susdd-pendle-monitor",

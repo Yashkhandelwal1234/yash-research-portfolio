@@ -5,7 +5,8 @@ export type ArticleFigureVisual = "reserve-flow" | "rate-spread" | "agent-networ
 export type ChecklistLevel = "green" | "amber" | "red";
 export type CalloutTone = "accent" | "info" | "warning";
 export type DashboardTool = "Dune" | "Observable" | "Streamlit" | "Python" | "Custom";
-export type DashboardDataMode = "static-manual";
+export type DashboardDataMode = "static-manual" | "cached-defillama" | "mixed-manual-cached";
+export type DashboardDataBadge = "manual" | "cached-defillama";
 export type DashboardBlockTone = "accent" | "info" | "warning";
 export type ResearchPlaylistIcon = "trending" | "bar-chart" | "globe" | "zap" | "database" | "bookmark";
 
@@ -110,12 +111,12 @@ export interface DashboardSourceLink {
 }
 
 export type DashboardContentBlock =
-  | { type: "metric-grid"; title: string; metrics: DashboardMetric[]; showStaticBadge?: boolean }
-  | { type: "rate-table"; title: string; rows: DashboardRateRow[]; showStaticBadge?: boolean }
-  | { type: "allocation-table"; title: string; rows: DashboardAllocationRow[]; showStaticBadge?: boolean }
-  | { type: "trend-chart"; title: string; points: DashboardTrendPoint[]; showStaticBadge?: boolean }
+  | { type: "metric-grid"; title: string; metrics: DashboardMetric[]; showStaticBadge?: boolean; dataBadge?: DashboardDataBadge }
+  | { type: "rate-table"; title: string; rows: DashboardRateRow[]; showStaticBadge?: boolean; dataBadge?: DashboardDataBadge }
+  | { type: "allocation-table"; title: string; rows: DashboardAllocationRow[]; showStaticBadge?: boolean; dataBadge?: DashboardDataBadge }
+  | { type: "trend-chart"; title: string; points: DashboardTrendPoint[]; showStaticBadge?: boolean; dataBadge?: DashboardDataBadge }
   | { type: "note"; title: string; text: string; tone?: DashboardBlockTone }
-  | { type: "risk-checklist"; title: string; items: DashboardRiskItem[]; showStaticBadge?: boolean }
+  | { type: "risk-checklist"; title: string; items: DashboardRiskItem[]; showStaticBadge?: boolean; dataBadge?: DashboardDataBadge }
   | { type: "source-list"; title: string; sources: DashboardSourceLink[] }
   | { type: "future-data-sources"; title: string; items: string[] };
 

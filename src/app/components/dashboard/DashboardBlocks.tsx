@@ -7,7 +7,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { ChecklistLevel, DashboardContentBlock } from "../../types/content";
+import type { ChecklistLevel, DashboardContentBlock, DashboardDataBadge } from "../../types/content";
 
 const riskStyles: Record<ChecklistLevel, string> = {
   green: "text-[#1ED760]",
@@ -21,19 +21,26 @@ function formatUsd(value: number) {
   return `$${value.toLocaleString("en-US")}`;
 }
 
-function StaticBadge() {
+const dataBadgeLabels: Record<DashboardDataBadge, string> = {
+  manual: "Static data",
+  "cached-defillama": "Cached data",
+};
+
+function StaticBadge({ dataBadge = "manual" }: { dataBadge?: DashboardDataBadge }) {
   return (
     <span className="rounded-sm bg-[#1ED760]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#1ED760]">
-      Static data
+      {dataBadgeLabels[dataBadge]}
     </span>
   );
 }
 
-function SectionHeader({ title, showStaticBadge = false }: { title: string; showStaticBadge?: boolean }) {
+function SectionHeader({ title, showStaticBadge = false, dataBadge }: { title: string; showStaticBadge?: boolean; dataBadge?: DashboardDataBadge }) {
+  const visibleBadge = dataBadge ?? (showStaticBadge ? "manual" : undefined);
+
   return (
     <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-      {showStaticBadge && <StaticBadge />}
+      {visibleBadge && <StaticBadge dataBadge={visibleBadge} />}
     </div>
   );
 }
@@ -43,7 +50,7 @@ function MetricGridBlock({ block }: { block: Extract<DashboardContentBlock, { ty
 
   return (
     <section className="rounded-lg border border-white/[0.07] bg-[#121212] p-4">
-      <SectionHeader title={block.title} showStaticBadge={block.showStaticBadge} />
+      <SectionHeader title={block.title} showStaticBadge={block.showStaticBadge} dataBadge={block.dataBadge} />
       {singleMetric ? (
         <div className="rounded-md border border-[#1ED760]/20 bg-[#1ED760]/[0.06] p-4">
           <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{singleMetric.label}</p>
@@ -68,7 +75,7 @@ function MetricGridBlock({ block }: { block: Extract<DashboardContentBlock, { ty
 function RateTableBlock({ block }: { block: Extract<DashboardContentBlock, { type: "rate-table" }> }) {
   return (
     <section className="rounded-lg border border-white/[0.07] bg-[#121212] p-4">
-      <SectionHeader title={block.title} showStaticBadge={block.showStaticBadge} />
+      <SectionHeader title={block.title} showStaticBadge={block.showStaticBadge} dataBadge={block.dataBadge} />
       <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
         {block.rows.map(rate => (
           <div key={rate.label} className="rounded-md border border-white/[0.07] bg-[#181818] p-3">
@@ -95,7 +102,7 @@ function RateTableBlock({ block }: { block: Extract<DashboardContentBlock, { typ
 function AllocationTableBlock({ block }: { block: Extract<DashboardContentBlock, { type: "allocation-table" }> }) {
   return (
     <section className="rounded-lg border border-white/[0.07] bg-[#121212] p-4">
-      <SectionHeader title={block.title} showStaticBadge={block.showStaticBadge} />
+      <SectionHeader title={block.title} showStaticBadge={block.showStaticBadge} dataBadge={block.dataBadge} />
       <div className="space-y-2">
         {block.rows.map(row => (
           <div key={row.venue} className="rounded-md border border-white/[0.07] bg-[#181818] p-3">
@@ -120,7 +127,7 @@ function AllocationTableBlock({ block }: { block: Extract<DashboardContentBlock,
 function TrendChartBlock({ block }: { block: Extract<DashboardContentBlock, { type: "trend-chart" }> }) {
   return (
     <section className="rounded-lg border border-white/[0.07] bg-[#121212] p-4">
-      <SectionHeader title={block.title} showStaticBadge={block.showStaticBadge} />
+      <SectionHeader title={block.title} showStaticBadge={block.showStaticBadge} dataBadge={block.dataBadge} />
       <div className="h-52 rounded-md border border-white/[0.07] bg-[#181818] p-2">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={block.points} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
@@ -169,7 +176,7 @@ function NoteBlock({ block }: { block: Extract<DashboardContentBlock, { type: "n
 function RiskChecklistBlock({ block }: { block: Extract<DashboardContentBlock, { type: "risk-checklist" }> }) {
   return (
     <section className="rounded-lg border border-white/[0.07] bg-[#121212] p-4">
-      <SectionHeader title={block.title} showStaticBadge={block.showStaticBadge} />
+      <SectionHeader title={block.title} showStaticBadge={block.showStaticBadge} dataBadge={block.dataBadge} />
       <div className="space-y-2">
         {block.items.map(item => (
           <div key={item.label} className="flex gap-3 rounded-md border border-white/[0.07] bg-[#181818] p-3">

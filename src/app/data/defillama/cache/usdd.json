@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "provider": "DefiLlama",
+  "fetchedAt": "2026-06-26T06:07:18.841Z",
+  "sources": [
+    {
+      "id": "protocol-usdd",
+      "label": "USDD protocol TVL and chain breakdown",
+      "url": "https://api.llama.fi/protocol/usdd",
+      "ok": true,
+      "status": 200,
+      "fetchedAt": "2026-06-26T06:07:18.841Z"
+    },
+    {
+      "id": "tvl-usdd",
+      "label": "USDD current protocol TVL",
+      "url": "https://api.llama.fi/tvl/usdd",
+      "ok": true,
+      "status": 200,
+      "fetchedAt": "2026-06-26T06:07:21.440Z"
+    },
+    {
+      "id": "fees-revenue-usdd",
+      "label": "USDD fees and revenue summary",
+      "url": "https://api.llama.fi/summary/fees/usdd?dataType=dailyRevenue",
+      "ok": true,
+      "status": 200,
+      "fetchedAt": "2026-06-26T06:07:21.738Z"
+    },
+    {
+      "id": "stablecoin-list",
+      "label": "Stablecoin list used to verify USDD asset id",
+      "url": "https://stablecoins.llama.fi/stablecoins?includePrices=true",
+      "ok": true,
+      "status": 200,
+      "fetchedAt": "2026-06-26T06:07:23.258Z",
+      "note": "Current docs list api.llama.fi for stablecoin paths, but the working free stablecoin host is stablecoins.llama.fi."
+    },
+    {
+      "id": "stablecoin-chart-usdd",
+      "label": "USDD stablecoin circulating supply chart",
+      "url": "https://stablecoins.llama.fi/stablecoincharts/all?stablecoin=14",
+      "ok": true,
+      "status": 200,
+      "fetchedAt": "2026-06-26T06:07:23.941Z",
+      "note": "Asset id is resolved from the stablecoin list by USDD symbol/name before this endpoint is called."
+    }
+  ],
+  "validationNotes": [
+    "USDD protocol slug validated from protocol endpoint.",
+    "USDD stablecoin asset id 14 resolved from stablecoin list by symbol/name before chart fetch.",
+    "Stablecoin endpoints use stablecoins.llama.fi because api.llama.fi stablecoin paths returned 404 during Phase 2 validation.",
+    "Cache is generated manually with npm run data:defillama and is not fetched in the browser or during Vercel build."
+  ],
+  "protocol": {
+    "id": "5898",
+    "slug": "usdd",
+    "name": "USDD",
+    "category": "CDP",
+    "chains": [
+      "Binance",
+      "Ethereum",
+      "Tron"
+    ],
+    "currentTvlUsd": 1316713269.5682926,
+    "currentChainTvlsUsd": [
+      {
+        "chain": "Tron",
+        "tvlUsd": 1219700494.46515
+      },
+      {
+        "chain": "Ethereum",
+        "tvlUsd": 81987270.37791
+      },
+      {
+        "chain": "Binance",
+        "tvlUsd": 15025504.72523
+      }
+    ],
+    "tvlHistory": [
+      {
+        "date": "2026-06-14",
+        "timestamp": 1781395200,
+        "tvlUsd": 1278147445
+      },
+      {
+        "date": "2026-06-15",
+        "timestamp": 1781481600,
+        "tvlUsd": 1295376582
+      },
+      {
+        "date": "2026-06-16",
+        "timestamp": 1781568000,
+        "tvlUsd": 1291660514
+      },
+      {
+        "date": "2026-06-17",
+        "timestamp": 1781654400,
+        "tvlUsd": 1282507549
+      },
+      {
+        "date": "2026-06-18",
+        "timestamp": 1781740800,
+        "tvlUsd": 1307981783
+      },
+      {
+        "date": "2026-06-19",
+        "timestamp": 1781827200,
+        "tvlUsd": 1293289435
+      },
+      {
+        "date": "2026-06-20",
+        "timestamp": 1781913600,
+        "tvlUsd": 1310401301
+      },
+      {
+        "date": "2026-06-21",
+        "timestamp": 1782000000,
+        "tvlUsd": 1317455552
+      },
+      {
+        "date": "2026-06-22",
+        "timestamp": 1782086400,
+        "tvlUsd": 1326592422
+      },
+      {
+        "date": "2026-06-23",
+        "timestamp": 1782172800,
+        "tvlUsd": 1349497445
+      },
+      {
+        "date": "2026-06-24",
+        "timestamp": 1782259200,
+        "tvlUsd": 1339778472
+      },
+      {
+        "date": "2026-06-25",
+        "timestamp": 1782345600,
+        "tvlUsd": 1332011147
+      },
+      {
+        "date": "2026-06-26",
+        "timestamp": 1782432000,
+        "tvlUsd": 1321100359
+      },
+      {
+        "date": "2026-06-26",
+        "timestamp": 1782447251,
+        "tvlUsd": 1316713269
+      }
+    ]
+  },
+  "stablecoin": {
+    "assetId": "14",
+    "name": "USDD",
+    "symbol": "USDD",
+    "price": 0.9984054565180236,
+    "circulatingUsd": 1381596951.7191243,
+    "chains": [
+      "Tron",
+      "Ethereum",
+      "BSC",
+      "Bittorrent"
+    ],
+    "supplyHistory": [
+      {
+        "date": "2026-06-13",
+        "timestamp": 1781308800,
+        "circulatingUsd": 1357148013
+      },
+      {
+        "date": "2026-06-14",
+        "timestamp": 1781395200,
+        "circulatingUsd": 1363600218
+      },
+      {
+        "date": "2026-06-15",
+        "timestamp": 1781481600,
+        "circulatingUsd": 1361470858
+      },
+      {
+        "date": "2026-06-16",
+        "timestamp": 1781568000,
+        "circulatingUsd": 1369058704
+      },
+      {
+        "date": "2026-06-17",
+        "timestamp": 1781654400,
+        "circulatingUsd": 1365072679
+      },
+      {
+        "date": "2026-06-18",
+        "timestamp": 1781740800,
+        "circulatingUsd": 1373390848
+      },
+      {
+        "date": "2026-06-19",
+        "timestamp": 1781827200,
+        "circulatingUsd": 1362393803
+      },
+      {
+        "date": "2026-06-20",
+        "timestamp": 1781913600,
+        "circulatingUsd": 1370474443
+      },
+      {
+        "date": "2026-06-21",
+        "timestamp": 1782000000,
+        "circulatingUsd": 1365746983
+      },
+      {
+        "date": "2026-06-22",
+        "timestamp": 1782086400,
+        "circulatingUsd": 1372101038
+      },
+      {
+        "date": "2026-06-23",
+        "timestamp": 1782172800,
+        "circulatingUsd": 1373122966
+      },
+      {
+        "date": "2026-06-24",
+        "timestamp": 1782259200,
+        "circulatingUsd": 1379143569
+      },
+      {
+        "date": "2026-06-25",
+        "timestamp": 1782345600,
+        "circulatingUsd": 1377211941
+      },
+      {
+        "date": "2026-06-26",
+        "timestamp": 1782432000,
+        "circulatingUsd": 1379920288.11
+      }
+    ]
+  },
+  "feesRevenue": {
+    "slug": "usdd",
+    "name": "USDD",
+    "total24hUsd": 15147,
+    "total7dUsd": 106010,
+    "total30dUsd": 463318,
+    "totalAllTimeUsd": 3774538,
+    "revenueHistory": [
+      {
+        "date": "2026-06-13",
+        "timestamp": 1781308800,
+        "revenueUsd": 15080
+      },
+      {
+        "date": "2026-06-14",
+        "timestamp": 1781395200,
+        "revenueUsd": 15027
+      },
+      {
+        "date": "2026-06-15",
+        "timestamp": 1781481600,
+        "revenueUsd": 14982
+      },
+      {
+        "date": "2026-06-16",
+        "timestamp": 1781568000,
+        "revenueUsd": 15108
+      },
+      {
+        "date": "2026-06-17",
+        "timestamp": 1781654400,
+        "revenueUsd": 15166
+      },
+      {
+        "date": "2026-06-18",
+        "timestamp": 1781740800,
+        "revenueUsd": 15287
+      },
+      {
+        "date": "2026-06-19",
+        "timestamp": 1781827200,
+        "revenueUsd": 15222
+      },
+      {
+        "date": "2026-06-20",
+        "timestamp": 1781913600,
+        "revenueUsd": 15239
+      },
+      {
+        "date": "2026-06-21",
+        "timestamp": 1782000000,
+        "revenueUsd": 15148
+      },
+      {
+        "date": "2026-06-22",
+        "timestamp": 1782086400,
+        "revenueUsd": 15166
+      },
+      {
+        "date": "2026-06-23",
+        "timestamp": 1782172800,
+        "revenueUsd": 14984
+      },
+      {
+        "date": "2026-06-24",
+        "timestamp": 1782259200,
+        "revenueUsd": 15108
+      },
+      {
+        "date": "2026-06-25",
+        "timestamp": 1782345600,
+        "revenueUsd": 15143
+      },
+      {
+        "date": "2026-06-26",
+        "timestamp": 1782432000,
+        "revenueUsd": 15147
+      }
+    ]
+  }
+}

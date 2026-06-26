@@ -1,5 +1,5 @@
 import { FileText } from "lucide-react";
-import { STATIC_MANUAL_DASHBOARD_LABEL } from "../../content/dashboardSpecs";
+import { DASHBOARD_DATA_MODE_BADGE_LABELS, getDashboardDataModeLabel } from "../../content/dashboardSpecs";
 import type { BuildStatus, DashboardSpec } from "../../types/content";
 import { DashboardBlock } from "./DashboardBlocks";
 
@@ -9,10 +9,10 @@ const statusStyles: Record<BuildStatus, string> = {
   Planned: "text-[#B3B3B3]",
 };
 
-function StaticDataLabel() {
+function DataModeLabel({ spec }: { spec: DashboardSpec }) {
   return (
     <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#1ED760]">
-      {STATIC_MANUAL_DASHBOARD_LABEL}
+      {getDashboardDataModeLabel(spec.dataMode)}
     </p>
   );
 }
@@ -33,13 +33,13 @@ export default function DashboardDetail({ spec, onArticleClick }: { spec: Dashbo
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <StatusPill status={spec.status} />
             <span className="rounded-sm bg-[#1ED760]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-[#1ED760]">
-              {spec.dataMode}
+              {DASHBOARD_DATA_MODE_BADGE_LABELS[spec.dataMode]}
             </span>
           </div>
           <h2 className="text-lg font-semibold leading-tight text-foreground">{spec.title}</h2>
           <p className="mt-1 max-w-2xl text-[13px] leading-6 text-muted-foreground">{spec.subtitle}</p>
           <div className="mt-3">
-            <StaticDataLabel />
+            <DataModeLabel spec={spec} />
           </div>
         </div>
         <div className="grid min-w-[220px] gap-2 rounded-md border border-white/[0.07] bg-[#121212] p-3 text-[11px] text-muted-foreground">

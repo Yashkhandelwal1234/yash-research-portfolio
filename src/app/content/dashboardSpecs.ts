@@ -1,6 +1,27 @@
-import type { DashboardSpec } from "../types/content";
+import { buildUsddDefiLlamaBlocks, getUsddDefiLlamaMetadata } from "../data/defillama/usddAdapter";
+import type { DashboardDataMode, DashboardSpec } from "../types/content";
 
 export const STATIC_MANUAL_DASHBOARD_LABEL = "Static/manual snapshot — not live data.";
+export const CACHED_DEFILLAMA_DASHBOARD_LABEL = "Cached DefiLlama snapshot — not live data.";
+export const MIXED_MANUAL_CACHED_DASHBOARD_LABEL = "Mixed manual + cached snapshot — not live data.";
+
+export const DASHBOARD_DATA_MODE_LABELS: Record<DashboardDataMode, string> = {
+  "static-manual": STATIC_MANUAL_DASHBOARD_LABEL,
+  "cached-defillama": CACHED_DEFILLAMA_DASHBOARD_LABEL,
+  "mixed-manual-cached": MIXED_MANUAL_CACHED_DASHBOARD_LABEL,
+};
+
+export const DASHBOARD_DATA_MODE_BADGE_LABELS: Record<DashboardDataMode, string> = {
+  "static-manual": "manual snapshot",
+  "cached-defillama": "cached snapshot",
+  "mixed-manual-cached": "mixed snapshot",
+};
+
+export function getDashboardDataModeLabel(dataMode: DashboardDataMode) {
+  return DASHBOARD_DATA_MODE_LABELS[dataMode];
+}
+
+const usddDefiLlamaMetadata = getUsddDefiLlamaMetadata();
 
 export const dashboardSpecs: DashboardSpec[] = [
   {
@@ -8,10 +29,10 @@ export const dashboardSpecs: DashboardSpec[] = [
     title: "Stablecoin Yield / sUSDD Pendle Monitor",
     subtitle: "Manual view of the sUSDD base-yield engine, Pendle position rates, allocator concentration, and risk checks.",
     status: "Building",
-    dataMode: "static-manual",
-    snapshotDate: "2026-06-26",
-    lastUpdated: "2026-06-26",
-    sourceNote: "Values are manually copied from the existing USDD/Pendle memo and local dashboard screenshots. Recheck every number before treating it as current.",
+    dataMode: "mixed-manual-cached",
+    snapshotDate: usddDefiLlamaMetadata.snapshotDate,
+    lastUpdated: usddDefiLlamaMetadata.lastUpdated,
+    sourceNote: usddDefiLlamaMetadata.sourceNote,
     researchQuestion: "Which parts of the sUSDD/Pendle setup need monitoring before the dashboard becomes automated?",
     relatedArticleSlug: "usdd-pendle-investment-memo",
     blocks: [
@@ -52,6 +73,7 @@ export const dashboardSpecs: DashboardSpec[] = [
           },
         ],
       },
+      ...buildUsddDefiLlamaBlocks(),
       {
         type: "metric-grid",
         title: "Base sUSDD Yield",
@@ -181,7 +203,12 @@ export const dashboardSpecs: DashboardSpec[] = [
           {
             label: "DeFiLlama USDD",
             url: "https://defillama.com/protocol/usdd",
-            note: "Manual review page for TVL, fees, revenue, and income statement context.",
+            note: "Manual review page; cached values are generated locally with npm run data:defillama, not fetched live in the browser.",
+          },
+          {
+            label: "DefiLlama API Docs",
+            url: "https://api-docs.defillama.com/",
+            note: "Reference for the free endpoints used by the local cache script; no Pro API or key is used.",
           },
           {
             label: "Pendle sUSDD Market",
@@ -199,9 +226,9 @@ export const dashboardSpecs: DashboardSpec[] = [
         type: "future-data-sources",
         title: "Future Data Sources",
         items: [
-          "DefiLlama API candidate - not connected in Phase 1",
-          "Dune API candidate - not connected in Phase 1",
-          "CoinGlass candidate - not connected in Phase 1",
+          "DefiLlama live/browser refresh - not active in Phase 2",
+          "Dune API candidate - not connected in Phase 2",
+          "CoinGlass candidate - not connected in Phase 2",
         ],
       },
     ],

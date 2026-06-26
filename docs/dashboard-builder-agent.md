@@ -1,23 +1,25 @@
 # Dashboard Builder Agent
 
-This document defines Phase 1 and Phase 1.5 of the Codex-triggered Dashboard Builder Agent for the Spotify-inspired research portfolio.
+This document defines Phase 1, Phase 1.5, and Phase 2 of the Codex-triggered Dashboard Builder Agent for the Spotify-inspired research portfolio.
 
-## Phase 1 / 1.5 Scope
+## Phase 1 / 1.5 / 2 Scope
 
 - The agent runs through Codex only.
 - The website remains a Vite + React + TypeScript + Tailwind app.
 - Dashboard content stays in the existing TypeScript content-object system.
-- Data is static/manual for now.
-- Dashboard specs must include `dataMode: "static-manual"`, `snapshotDate`, `lastUpdated`, and `sourceNote`.
+- Data is static/manual or locally cached for now.
+- Dashboard specs must include `dataMode`, `snapshotDate`, `lastUpdated`, and `sourceNote`.
 - Dashboard specs are built from reusable content blocks instead of one dashboard-specific shape.
-- Every dashboard detail UI must clearly show: "Static/manual snapshot — not live data."
+- Every dashboard detail UI must clearly show whether data is manual, cached, or mixed.
 
 ## Explicit Non-Goals
 
-Do not add these in Phase 1 or Phase 1.5:
+Do not add these in Phase 1, Phase 1.5, or Phase 2:
 
 - OpenAI API
-- DefiLlama API
+- DefiLlama Pro API
+- DefiLlama browser live fetches
+- DefiLlama Vercel build-time fetches
 - Dune API
 - CoinGlass
 - backend
@@ -30,15 +32,34 @@ Do not add these in Phase 1 or Phase 1.5:
 
 Future data sources can be named as candidates only when the UI and copy make clear that they are not connected yet.
 
+## Phase 2 DefiLlama Cache
+
+Phase 2 adds DefiLlama as the first free data source through a local cache only.
+
+- Run `npm run data:defillama` manually from Terminal when the cache should be refreshed.
+- The script uses built-in Node `fetch`; no package, SDK, API key, or secret is required.
+- The script writes `src/app/data/defillama/cache/usdd.json` only after all required requests validate.
+- The React app imports the committed cache at build time; it does not fetch from DefiLlama in the browser.
+- Vercel builds do not fetch from DefiLlama in Phase 2.
+
+Supported data labels:
+
+- `static-manual`: "Static/manual snapshot — not live data."
+- `cached-defillama`: "Cached DefiLlama snapshot — not live data."
+- `mixed-manual-cached`: "Mixed manual + cached snapshot — not live data."
+
+Cached DefiLlama blocks can show protocol TVL, chain TVL, stablecoin supply, price/peg check, and revenue fields when those values are present in the cache. Do not use DefiLlama yields for Pendle PT/YT/LP rates until the exact sUSDD Pendle pool id has been verified.
+
 ## Dashboard Spec Workflow
 
 1. Read `src/app/types/content.ts`, `src/app/content/dashboards.ts`, `src/app/content/dashboardSpecs.ts`, and the related article content before changing dashboard data.
 2. Add or update a `DashboardSpec` object.
 3. Choose dashboard blocks based on the dashboard's research question.
-4. Copy only numbers that already exist in the repo or that Yash explicitly provides.
+4. Copy only numbers that already exist in the repo, that Yash explicitly provides, or that come from a committed cache file.
 5. Add source links as manual review links, not as API integrations.
 6. Link the dashboard card to the spec with `specSlug`.
-7. Run `npm run build`.
+7. Run `npm run data:defillama` only when a DefiLlama cache refresh is part of the task.
+8. Run `npm run build`.
 
 ## Dashboard Blocks
 
@@ -61,8 +82,10 @@ Future dashboards should not be forced into the sUSDD/Pendle structure. Pick onl
 
 - Do not invent numbers.
 - Do not present copied memo values as current live values.
+- Do not present cached DefiLlama values as current live values.
 - Preserve source labels, URLs, dates, and uncertainty.
 - If live values have drifted from the static memo snapshot, keep the dashboard labeled as static/manual.
+- If DefiLlama values are cached, keep the dashboard labeled as cached or mixed.
 - Separate base/organic yield from incentive-heavy campaign APYs.
 
 ## Phase 1 Sample Dashboard
@@ -81,13 +104,15 @@ It tracks:
 - source links
 - static/manual metadata
 
-The sample now uses generic dashboard blocks. Its content should stay stable while the renderer becomes reusable for future dashboard types.
+The sample now uses generic dashboard blocks plus a cached DefiLlama section. Manual Pendle, sUSDD yield, Smart Allocator, and risk content should stay stable unless a later task explicitly replaces a value with a verified cache source.
 
 ## Verification
 
-Before calling Phase 1 complete:
+Before calling dashboard work complete:
 
+- Run `npm run data:defillama` if DefiLlama cache code or cached values changed.
 - Run `npm run build`.
+- Run `git diff --check`.
 - Run `git status --short --branch`.
 - Confirm the dashboard page still uses the existing state-based page system.
 - Confirm the right research queue and bottom Now Reading bar are unchanged.
