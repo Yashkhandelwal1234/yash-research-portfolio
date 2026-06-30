@@ -8,6 +8,8 @@ export type DashboardTool = "Dune" | "Observable" | "Streamlit" | "Python" | "Cu
 export type DashboardDataMode = "static-manual" | "cached-defillama" | "mixed-manual-cached";
 export type DashboardDataBadge = "manual" | "cached-defillama";
 export type DashboardBlockTone = "accent" | "info" | "warning";
+export type DashboardExternalResearchProvider = "Dune";
+export type DashboardExternalResearchStatus = "planned" | "available";
 export type ResearchPlaylistIcon = "trending" | "bar-chart" | "globe" | "zap" | "database" | "bookmark";
 
 export interface CoverArtMetadata {
@@ -110,6 +112,15 @@ export interface DashboardSourceLink {
   note: string;
 }
 
+export interface DashboardExternalResearchLink {
+  provider: DashboardExternalResearchProvider;
+  title: string;
+  description: string;
+  status: DashboardExternalResearchStatus;
+  url?: string;
+  queryIds?: number[];
+}
+
 export type DashboardContentBlock =
   | { type: "metric-grid"; title: string; metrics: DashboardMetric[]; showStaticBadge?: boolean; dataBadge?: DashboardDataBadge }
   | { type: "rate-table"; title: string; rows: DashboardRateRow[]; showStaticBadge?: boolean; dataBadge?: DashboardDataBadge }
@@ -118,6 +129,7 @@ export type DashboardContentBlock =
   | { type: "note"; title: string; text: string; tone?: DashboardBlockTone }
   | { type: "risk-checklist"; title: string; items: DashboardRiskItem[]; showStaticBadge?: boolean; dataBadge?: DashboardDataBadge }
   | { type: "source-list"; title: string; sources: DashboardSourceLink[] }
+  | { type: "external-research-links"; title: string; links: DashboardExternalResearchLink[] }
   | { type: "future-data-sources"; title: string; items: string[] };
 
 export interface DashboardSpec {

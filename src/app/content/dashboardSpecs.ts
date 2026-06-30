@@ -187,6 +187,18 @@ export const dashboardSpecs: DashboardSpec[] = [
         ],
       },
       {
+        type: "external-research-links",
+        title: "On-chain Research",
+        links: [
+          {
+            provider: "Dune",
+            title: "sUSDD on Pendle: Ethereum Market Monitor",
+            description: "Manual Dune dashboard planned for verified Ethereum market activity. Dune is not connected to portfolio data yet.",
+            status: "planned",
+          },
+        ],
+      },
+      {
         type: "source-list",
         title: "Source Links",
         sources: [

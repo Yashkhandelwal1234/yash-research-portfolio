@@ -61,9 +61,20 @@ Available block types:
 - `note`
 - `risk-checklist`
 - `source-list`
+- `external-research-links`
 - `future-data-sources`
 
 Use `trend-chart` only for static chart data and only with the existing Recharts dependency. Use `future-data-sources` only for planned sources that are clearly labeled as not connected.
+
+## Manual Dune Proof of Work
+
+Phase 3 uses Dune only for a manually built public research dashboard. It does not add a Dune API, MCP connection, SDK, key, CSV export, cache, scheduler, browser fetch, or build-time fetch.
+
+- Read `docs/dune-workflow.md` before building or linking Dune work.
+- Verify the market and token contracts in the official product and Dune Data Explorer before writing analytical queries.
+- Use `external-research-links` with `status: "planned"` until a real public dashboard URL exists.
+- Add a `url` and verified numeric `queryIds` only after the public Dune dashboard and queries exist.
+- Keep the portfolio label clear: a manual Dune source is external research proof, not live portfolio data.
 
 ## DefiLlama Cached Blocks
 

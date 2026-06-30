@@ -218,6 +218,54 @@ function SourceListBlock({ block }: { block: Extract<DashboardContentBlock, { ty
   );
 }
 
+function ExternalResearchLinksBlock({ block }: { block: Extract<DashboardContentBlock, { type: "external-research-links" }> }) {
+  return (
+    <section className="rounded-lg border border-white/[0.07] bg-[#121212] p-4">
+      <SectionHeader title={block.title} />
+      <div className="space-y-2">
+        {block.links.map(link => {
+          const content = (
+            <>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-[#1ED760]">{link.provider}</p>
+                  <p className="mt-1 text-[12px] font-medium text-foreground">{link.title}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {link.url && <ExternalLink size={12} className="text-[#1ED760]" />}
+                  <span className="rounded-sm bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                    {link.status}
+                  </span>
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] leading-5 text-muted-foreground">{link.description}</p>
+              {link.queryIds && link.queryIds.length > 0 && (
+                <p className="mt-2 text-[10px] uppercase tracking-[0.08em] text-muted-foreground">Queries: {link.queryIds.join(", ")}</p>
+              )}
+            </>
+          );
+
+          return link.url ? (
+            <a
+              key={link.title}
+              href={link.url}
+              target="_blank"
+              rel="noreferrer"
+              className="block rounded-md border border-white/[0.07] bg-[#181818] p-3 transition-colors hover:border-white/[0.15] hover:bg-[#282828]"
+            >
+              {content}
+            </a>
+          ) : (
+            <div key={link.title} className="rounded-md border border-white/[0.07] bg-[#181818] p-3">
+              {content}
+            </div>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 function FutureDataSourcesBlock({ block }: { block: Extract<DashboardContentBlock, { type: "future-data-sources" }> }) {
   return (
     <section className="rounded-lg border border-white/[0.07] bg-[#121212] p-4">
@@ -249,6 +297,8 @@ export function DashboardBlock({ block }: { block: DashboardContentBlock }) {
       return <RiskChecklistBlock block={block} />;
     case "source-list":
       return <SourceListBlock block={block} />;
+    case "external-research-links":
+      return <ExternalResearchLinksBlock block={block} />;
     case "future-data-sources":
       return <FutureDataSourcesBlock block={block} />;
   }

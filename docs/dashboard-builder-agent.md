@@ -1,8 +1,8 @@
 # Dashboard Builder Agent
 
-This document defines Phase 1, Phase 1.5, Phase 2, and Phase 2.5 of the Codex-triggered Dashboard Builder Agent for the Spotify-inspired research portfolio.
+This document defines Phase 1, Phase 1.5, Phase 2, Phase 2.5, and Phase 3 of the Codex-triggered Dashboard Builder Agent for the Spotify-inspired research portfolio.
 
-## Phase 1 / 1.5 / 2 / 2.5 Scope
+## Phase 1 / 1.5 / 2 / 2.5 / 3 Scope
 
 - The agent runs through Codex only.
 - The website remains a Vite + React + TypeScript + Tailwind app.
@@ -14,7 +14,7 @@ This document defines Phase 1, Phase 1.5, Phase 2, and Phase 2.5 of the Codex-tr
 
 ## Explicit Non-Goals
 
-Do not add these in Phase 1, Phase 1.5, Phase 2, or Phase 2.5:
+Do not add these in Phase 1, Phase 1.5, Phase 2, Phase 2.5, or Phase 3:
 
 - OpenAI API
 - DefiLlama Pro API
@@ -87,6 +87,16 @@ When a refresh and validation both pass, review the cache diff and commit only t
 git add src/app/data/defillama/cache/usdd.json
 git commit -m "chore: refresh DefiLlama cache"
 ```
+
+## Phase 3 Manual Dune Proof of Work
+
+Phase 3 uses Dune only as a manually built public research artifact. It does not add a Dune API, MCP connection, SDK, API key, CSV export, cache, scheduler, browser fetch, or build-time fetch.
+
+- Build the first public dashboard manually: `sUSDD on Pendle: Ethereum Market Monitor`.
+- Verify the Ethereum market and token contracts before using them in a query.
+- Record a public dashboard URL, query URLs, numeric query ids, default parameters, and execution date only after they exist.
+- Use an `external-research-links` block for a planned or available public research link. Never create a fake Dune URL or query id.
+- Read `docs/dune-workflow.md` before manually building or linking Dune work.
 
 ## Dashboard Spec Workflow
 
